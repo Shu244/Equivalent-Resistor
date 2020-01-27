@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Equivalent Resistor</string>
+    <string name="compact">Compact</string>
+    <string name="accurate">Accurate</string>
+    <string name="go">GO</string>
+    <string name="search_hint">Desired Resistance</string>
+    <string name="no_resistors_message">Please Edit The Available Resistances.</string>
 </resources>
