@@ -13,17 +13,16 @@ public class MainOptimizer {
         return greedyAlgo;
     }
 
-    private static void optimize(EvolveOptimalResistors geneticAlgo, int numTop) {
+    private static List<String> optimize(EvolveOptimalResistors geneticAlgo, int numTop) {
         System.out.println("Evolving resistors.");
         geneticAlgo.evolve();
         System.out.println("Resistors evolved.");
         List<String> uniqueMostFitStrs = geneticAlgo.uniqueMostFitStr(numTop);
-        for(String str : uniqueMostFitStrs)
-            System.out.println(str);
+        return uniqueMostFitStrs
         System.out.println("------------End--------------");
     }
 
-    public static void run(double[] resistances, double desiredResistance, int numTop) {
+    public static List<String> run(double[] resistances, double desiredResistance, int numTop) {
         GreedySubcircuits greedyAlgo = genSubsDNA(resistances, desiredResistance);
         Resistor[] availableResistors = greedyAlgo.getFormattedResistances();
         DNA[] initialDNA = greedyAlgo.getDNA();
@@ -31,15 +30,15 @@ public class MainOptimizer {
 //        for(int i = 0; i < resistances.length; i ++)
 //            noInitial[i] = new Resistor(resistances[i]);
         EvolveOptimalResistors geneticAlgo = new EvolveOptimalResistors(availableResistors, desiredResistance, initialDNA);
-        optimize(geneticAlgo, numTop);
+        return optimize(geneticAlgo, numTop);
     }
 
-    public static void run(double[] resistances, double desiredResistance, int sizePriority, int popSize, int mutationRate, int numGen, int numTop) {
+    public static List<String> run(double[] resistances, double desiredResistance, int sizePriority, int popSize, int mutationRate, int numGen, int numTop) {
         GreedySubcircuits greedyAlgo = genSubsDNA(resistances, desiredResistance);
         Resistor[] availableResistors = greedyAlgo.getFormattedResistances();
         DNA[] initialDNA = greedyAlgo.getDNA();
         EvolveOptimalResistors geneticAlgo = new EvolveOptimalResistors(availableResistors, desiredResistance, sizePriority,
                 popSize, mutationRate, numGen, initialDNA);
-        optimize(geneticAlgo, numTop);
+        return optimize(geneticAlgo, numTop);
     }
 }

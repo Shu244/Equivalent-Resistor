@@ -1,17 +1,38 @@
 package com.example.equivalentresistor;
 
+import optimizer.*;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String mDataDirName = "data";
+    private static final String TAG = "MainActivity";
+    private static final String RESULTS = "com.example.equivalentresistor.results";
 
     private ResistorModel mModel;
 
@@ -19,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mSizePrioritySeekBar;
     private TextView mSearchEditText;
     private Button mSearchButton;
+
+    private List<String> mResults = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,38 +54,106 @@ public class MainActivity extends AppCompatActivity {
         mSearchButton = findViewById(R.id.searchButton);
 
         mModel = ResistorModel.getInstance();
-        if (mModel.getSize() == 0) {
+        if(savedInstanceState != null) {
+            mModel.setResistances(savedInstanceState.getDoubleArray(RESULTS));
+        } else if (mModel.getSize() == 0) {
             // Data needs to be filled in.
-            if(hasData()) {
+            File dir = new File(getFilesDir(),mDataDirName);
+            File[] dataFiles;
+            if(dir.exists() && (dataFiles = dir.listFiles()).length != 0) {
                 // There's data to fill in.
-                fillModel();
+                // Adding a waiting screen to ViewPager.
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+                    @Override
+                    public Fragment getItem(int position) {
+                        return TransitionFragment.getFragment(getResources().getString(R.string.wait));
+                    }
+
+                    @Override
+                    public int getCount() {
+                        return 1;
+                    }
+                });
+                fillModel(dataFiles);
             } else {
                 // There's no data to fill in. Disable search.
                 disableSearch();
             }
         }
 
-//        mSearchButton.setOnClickListener(new OnClickListener() {
-//            public void onClick(View v)
-//            {
-//                //DO SOMETHING! {RUN SOME FUNCTION ... DO CHECKS... ETC}
-//            }
-//        });
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v)
+            {
+                int compactPriority = mSizePrioritySeekBar.getProgress();
+                String search = mSearchEditText.getText().toString();
+                try {
+                    double searchDouble = Double.parseDouble(search);
+                    mSearchEditText.setTextColor(Color.GREEN);
+                    new RunOptimizer().execute(searchDouble, (double)compactPriority);
+                } catch (NumberFormatException e) {
+                    mSearchEditText.setTextColor(Color.RED);
+                }
+            }
+        });
+
+        mSearchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    // XML also selects all text when it is in focus.
+                    mSearchEditText.setTextColor(Color.BLACK);
+                }
+            }
+        });
     }
 
-    /*
-    Checks if there are any data files.
-     */
-    private boolean hasData() {
+    private File getMarkedFile(File[] dataFiles) throws Exception {
+        for(int i = 0; i < dataFiles.length; i ++) {
+            String fileName = dataFiles[i].getName();
+            if(fileName.charAt(0) == '~')
+                return dataFiles[i];
+        }
 
-        return false;
+        Log.d(TAG, "getMarkedFile: No marked files even though one should be marked.");
+        File first = dataFiles[0];
+        File newFile = new File(mDataDirName + "/~" + first.getName());
+        boolean result = first.renameTo(newFile);
+        if(!result)
+            throw new Exception();
+        else
+            return newFile;
     }
 
     /*
     Fills model with data.
      */
-    private void fillModel() {
-
+    private void fillModel(File[] dataFiles) {
+        try {
+            File selected = getMarkedFile(dataFiles);
+            BufferedReader br = new BufferedReader(new FileReader(selected));
+            String sizeStr = br.readLine();
+            int size = Integer.parseInt(sizeStr.trim());
+            double[] resistances = new double[size];
+            String line;
+            for (int i = 0; (line = br.readLine()) != null; i++) {
+                double resistance = Double.parseDouble(line.trim());
+                resistances[i] = resistance;
+            }
+            mModel.setResistances(resistances);
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "Selected file not found.", e);
+            disableSearch();
+        } catch (IOException e) {
+            Log.d(TAG, "Selected file not found.", e);
+            disableSearch();
+        } catch (NumberFormatException e) {
+            Log.d(TAG, "Unexpected error when filling model.", e);
+            disableSearch();
+        }catch (Exception e) {
+            Log.d(TAG, "Unexpected error when filling model.", e);
+            disableSearch();
+        }
     }
 
     /*
@@ -74,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                return NoResistorFragment.getFragment();
+                return TransitionFragment.getFragment(getResources().getString(R.string.no_resistors_message));
             }
 
             @Override
@@ -82,11 +173,97 @@ public class MainActivity extends AppCompatActivity {
                 return 1;
             }
         });
-
-        // Still need to update UI
         mSizePrioritySeekBar.setEnabled(false);
-        //mSizePrioritySeekBar.getThumb().setColorFilter(getResources().getColor(R.color.inactive), PorterDuff.Mode.MULTIPLY);
         mSearchEditText.setEnabled(false);
         mSearchButton.setEnabled(false);
+    }
+
+    private static String processFileNames(File[] existingFiles, String newFileName) throws IllegalArgumentException {
+        // Checking if file name is legal.
+        if(!newFileName.matches("[a-zA-Z0-9_]+"))
+            throw new IllegalArgumentException("Invalid file name.");
+
+        File marked = null;
+        String markedNameNoMark = "";
+        for(File existingFile : existingFiles) {
+            String existingFileName = existingFile.getName();
+            // Keeping track of previous marked file.
+            if (existingFileName.charAt(0) == '~') {
+                existingFileName = existingFileName.substring(1);
+                marked = existingFile;
+                markedNameNoMark = existingFileName;
+            }
+            // Checking if file name already exists.
+            if (newFileName.equals(existingFileName))
+                throw new IllegalArgumentException("Invalid file name.");
+        }
+
+        // Unmark previous marked file.
+        if(marked != null) {
+            File newFile = new File(mDataDirName + "/" + markedNameNoMark);
+            boolean result = marked.renameTo(newFile);
+        }
+
+        return "~" + newFileName;
+    }
+
+    /*
+    Automatically marks newly added file and unmarks old file. User must handle exceptions.
+     */
+    private static void writeFileOnInternalStorage(Context context, String fileName, String body) throws IOException, IllegalArgumentException {
+        File dir = new File(context.getFilesDir(),mDataDirName);
+        if(!dir.exists())
+            dir.mkdir();
+
+        File[] existingFiles = dir.listFiles();
+        fileName = processFileNames(existingFiles, fileName);
+        File dataFile = new File(dir, fileName);
+        FileWriter writer = new FileWriter(dataFile);
+        writer.append(body);
+        writer.flush();
+        writer.close();
+    }
+
+    private class RunOptimizer extends AsyncTask<Double,Void,List<String>> {
+        // Code to run in the background.
+        // Void… params means to put the remaining arguments into an array of type Void named params.
+        // Works only as the last argument.
+        @Override
+        protected List<String> doInBackground(Double... params) {
+            double searchDouble = params[0];
+            double compactPriority = params[1];
+            double[] resistances = mModel.getResistances();
+            List<String> outputs = MainOptimizer.run(resistances, searchDouble, (int)compactPriority, 3000, 3, 50, -1);
+            int numOutputs = outputs.size();
+            int TOP = 10;
+            int keepNum = numOutputs < TOP ? numOutputs : TOP;
+            return outputs.subList(0, keepNum);
+        }
+
+
+        @Override
+        protected void onPostExecute(List<String> strings) {
+            mResults = strings;
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+                @Override
+                public Fragment getItem(int position) {
+                    String RPNMessage = mResults.get(position);
+                    return TransitionFragment.getFragment(RPNMessage);
+                }
+
+                @Override
+                public int getCount() {
+                    return mResults.size();
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        if(mModel.getSize() != 0)
+            bundle.putDoubleArray(RESULTS, mModel.getResistances());
     }
 }

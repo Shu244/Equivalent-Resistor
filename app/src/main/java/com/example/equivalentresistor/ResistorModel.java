@@ -1,29 +1,23 @@
 package com.example.equivalentresistor;
 
-import java.util.ArrayList;
-import java.util.List;
-import exceptions.NoResistancesException;
-
 class ResistorModel {
 
     private static final ResistorModel mModel = new ResistorModel();
-    private List<Double> mResistances = new ArrayList<>();
+    private double[] mResistances = new double[0];
 
     static ResistorModel getInstance() {
         return mModel;
     }
 
     public int getSize() {
-        return mResistances.size();
+        return mResistances.length;
     }
 
-    public void setResistances(List<Double> resistances) {
+    public void setResistances(double[] resistances) {
         mResistances = resistances;
     }
 
-    public List<Double> getResistances() throws NoResistancesException {
-        if(mResistances.size() == 0)
-            throw new NoResistancesException();
+    public double[] getResistances()  {
         return mResistances;
     }
 

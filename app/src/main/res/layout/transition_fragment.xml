@@ -4,10 +4,10 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/messageTextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/inactive"
         android:gravity="center"
-        android:text="@string/no_resistors_message"
         android:textSize="30sp" />
 </LinearLayout>
