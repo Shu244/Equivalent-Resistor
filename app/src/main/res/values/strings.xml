@@ -6,4 +6,16 @@
     <string name="search_hint">Desired Resistance</string>
     <string name="no_resistors_message">Please Edit The Available Resistances.</string>
     <string name="wait">Please wait…</string>
+
+    <!-- Information dialog Strings.-->
+    <string name="dialog_information_title">Extra Information</string>
+    <string name="exit">Exit</string>
+    <string name="unit">ohms</string>
+    <string name="resistance">Resistance:</string>
+    <string name="difference">Difference:</string>
+    <string name="size">Size:</string>
+    <string name="rank">Rank:</string>
+
+    <!-- menu Strings -->
+    <string name="edit">edit resistances</string>
 </resources>

@@ -18,8 +18,8 @@ public class MainOptimizer {
         geneticAlgo.evolve();
         System.out.println("Resistors evolved.");
         List<String> uniqueMostFitStrs = geneticAlgo.uniqueMostFitStr(numTop);
-        return uniqueMostFitStrs
         System.out.println("------------End--------------");
+        return uniqueMostFitStrs;
     }
 
     public static List<String> run(double[] resistances, double desiredResistance, int numTop) {

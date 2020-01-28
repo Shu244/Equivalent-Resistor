@@ -6,17 +6,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/messageTextView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/informationFAB"
         android:layout_width="wrap_content"
@@ -26,18 +15,21 @@
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@mipmap/ic_add" />
+        app:srcCompat="@drawable/ic_information_foreground" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/downloadFAB"
+    <TextView
+        android:id="@+id/rankerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="5dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toTopOf="@+id/informationFAB"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@color/ranker_background"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="1"
+        android:textSize="36sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@mipmap/ic_download_round" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

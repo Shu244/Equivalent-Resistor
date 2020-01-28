@@ -2,7 +2,6 @@ package com.example.equivalentresistor;
 
 import optimizer.*;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -14,6 +13,9 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -106,6 +108,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.editMenuItem:
+                // Start edit resistance intent
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private File getMarkedFile(File[] dataFiles) throws Exception {
@@ -249,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public Fragment getItem(int position) {
                     String RPNMessage = mResults.get(position);
-                    return TransitionFragment.getFragment(RPNMessage);
+                    return ResistorFragment.getFragment(RPNMessage, position);
                 }
 
                 @Override
