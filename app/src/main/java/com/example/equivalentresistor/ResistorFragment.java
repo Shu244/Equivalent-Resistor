@@ -19,6 +19,9 @@ public class ResistorFragment extends Fragment {
     private TextView mRankerTextView;
     private FloatingActionButton mInformationFAB;
 
+    private static final String mMessage = "com.example.equivalentresistor.resistor_message";
+    private static final String mRank = "com.example.equivalentresistor.rank";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
         // Do I need super? NO
@@ -26,6 +29,11 @@ public class ResistorFragment extends Fragment {
         mMessageTextView = v.findViewById(R.id.messageTextView);
         mRankerTextView = v.findViewById(R.id.rankerTextView);
         mInformationFAB = v.findViewById(R.id.informationFAB);
+
+        Bundle args = getArguments();
+        mMessageTextView.setText(args.getString(mMessage));
+        mRankerTextView.setText(args.getInt(mRank) + "");
+
         return v;
     }
 
@@ -43,12 +51,16 @@ public class ResistorFragment extends Fragment {
 
     public static ResistorFragment getFragment(String message, int rank) {
         ResistorFragment frag = new ResistorFragment();
-        frag.mMessageTextView.setText(message);
-        frag.mRankerTextView.setText(rank + "");
+
+        Bundle args = new Bundle();
+        args.putString(mMessage, message);
+        args.putInt(mRank, rank);
+        frag.setArguments(args);
+
         return frag;
     }
 
-    class InformationDialog extends DialogFragment {
+    public static class InformationDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.information_dialog, null);

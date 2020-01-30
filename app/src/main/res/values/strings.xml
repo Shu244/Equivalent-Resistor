@@ -18,4 +18,8 @@
 
     <!-- menu Strings -->
     <string name="edit">edit resistances</string>
+
+    <!-- Adding new resistor set dialog Strings. -->
+    <string name="name">Set Name</string>
+    <string name="add_resistor_set_dialog_title">Please name the new set</string>
 </resources>

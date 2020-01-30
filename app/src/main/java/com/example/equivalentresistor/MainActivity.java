@@ -32,9 +32,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String mDataDirName = "data";
-    private static final String TAG = "MainActivity";
-    private static final String RESULTS = "com.example.equivalentresistor.results";
+    public static final String mDataDirName = "data";
+    public static final String TAG = "MainActivity";
+    public static final String RESULTS = "com.example.equivalentresistor.results";
 
     private ResistorModel mModel;
 
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.editMenuItem:
-                // Start edit resistance intent
+                startActivity(ManageResistorSetsActivity.getIntent(this));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
