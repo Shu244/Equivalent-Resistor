@@ -1,5 +1,6 @@
 package com.example.equivalentresistor;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -29,7 +30,8 @@ public class ResistorSetsViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
-                // Launch Fragment.
+                Context context = v.getContext();
+                context.startActivity(EditSetActivity.getIntent(context, mSetNameTextView.getText().toString()));
             }
         });
     }

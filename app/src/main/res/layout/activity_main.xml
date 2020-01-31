@@ -76,9 +76,9 @@
                 android:layout_weight="7"
                 android:ems="10"
                 android:gravity="center"
+                android:hint="@string/search_hint"
                 android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:text="@string/search_hint" />
+                android:selectAllOnFocus="true" />
 
             <Button
                 android:id="@+id/searchButton"

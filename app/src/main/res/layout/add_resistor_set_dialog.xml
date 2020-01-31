@@ -12,8 +12,8 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:gravity="center"
+        android:hint="@string/name"
         android:inputType="textPersonName"
         android:selectAllOnFocus="true"
-        android:text="@string/name"
         android:textSize="18sp" />
 </LinearLayout>

@@ -12,8 +12,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ManageResistorSetsActivity extends AppCompatActivity {
+
+    private static final String TAG = "ManageResistorSets";
 
     private FloatingActionButton mDownloadFAB;
     private FloatingActionButton mAddFAB;
@@ -93,37 +97,48 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
             setNameTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    // Resets color to black when user interacts with it.
-                    setNameTextView.setTextColor(Color.BLACK);
+                    if(hasFocus)
+                        setNameTextView.setTextColor(Color.BLACK);
                 }
             });
-            return new AlertDialog.Builder(getActivity())
+            final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
                     .setTitle(R.string.add_resistor_set_dialog_title)
                     // null can be DialogInterface.OnClickListener
-                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    .setNegativeButton(android.R.string.cancel, null) // Will close automatically when clicked.
+                    .setPositiveButton(android.R.string.ok, null) // Overriding next.
+                    .create();
+            // Overriding action of positive button so that it only closes when input is acceptable.
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialogInterface) {
+                    // Defining
+                    Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    button.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(View view) {
+                            // setNameTextView.clearFocus(); // For smooth UI.
                             String newFileName = setNameTextView.getText().toString();
-                            if(!legalFileName(newFileName)) {
-                                // TO DO: Does not work as follows
-                                setNameTextView.setTextColor(Color.RED);
-                            } else {
+                            Log.d(TAG, "positive button clicked");
+                            if(legalFileName(newFileName)) {
                                 // Launch next intent
+                                Log.d(TAG, "Positive button legal name.");
+                                startActivity(EditSetActivity.getIntent(getActivity(), setNameTextView.getText().toString()));
+                            } else {
+                                // TO DO: Does not work as follows
+                                Log.d(TAG, "Positive button not legal name.");
+                                setNameTextView.setTextColor(Color.RED);
                             }
                         }
-                    })
-                    .create();
+                    });
+                }
+            });
+            return dialog;
         }
     }
 
     public static boolean legalFileName(String newFileName) {
+        Log.d(TAG, "Matches: " + newFileName.matches("[a-zA-Z0-9_]+"));
         if(!newFileName.matches("[a-zA-Z0-9_]+"))
             return false;
         return true;

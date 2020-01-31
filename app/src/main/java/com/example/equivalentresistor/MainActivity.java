@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,7 +26,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,22 +147,28 @@ public class MainActivity extends AppCompatActivity {
             return newFile;
     }
 
+    public static void fillModel(File dataFile) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(dataFile));
+        List<Double> resistances = new ArrayList<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] elements = line.trim().split(" ");
+            double resistance = Double.parseDouble(elements[0]);
+            int qty = Integer.parseInt(elements[1]);
+            for(int qty_i = 0; qty_i < qty; qty_i ++)
+                resistances.add(resistance);
+        }
+        ResistorModel model = ResistorModel.getInstance();
+        model.setResistances(resistances);
+    }
+
     /*
     Fills model with data.
      */
     private void fillModel(File[] dataFiles) {
         try {
             File selected = getMarkedFile(dataFiles);
-            BufferedReader br = new BufferedReader(new FileReader(selected));
-            String sizeStr = br.readLine();
-            int size = Integer.parseInt(sizeStr.trim());
-            double[] resistances = new double[size];
-            String line;
-            for (int i = 0; (line = br.readLine()) != null; i++) {
-                double resistance = Double.parseDouble(line.trim());
-                resistances[i] = resistance;
-            }
-            mModel.setResistances(resistances);
+            fillModel(selected);
         } catch (FileNotFoundException e) {
             Log.d(TAG, "Selected file not found.", e);
             disableSearch();
@@ -176,6 +182,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Unexpected error when filling model.", e);
             disableSearch();
         }
+    }
+
+    public static Intent getIntent(Context context) {
+        Intent i = new Intent(context, MainActivity.class);
+        return i;
     }
 
     /*
@@ -200,52 +211,6 @@ public class MainActivity extends AppCompatActivity {
         mSearchButton.setEnabled(false);
     }
 
-    private static String processFileNames(File[] existingFiles, String newFileName) throws IllegalArgumentException {
-        // Checking if file name is legal.
-        if(!newFileName.matches("[a-zA-Z0-9_]+"))
-            throw new IllegalArgumentException("Invalid file name.");
-
-        File marked = null;
-        String markedNameNoMark = "";
-        for(File existingFile : existingFiles) {
-            String existingFileName = existingFile.getName();
-            // Keeping track of previous marked file.
-            if (existingFileName.charAt(0) == '~') {
-                existingFileName = existingFileName.substring(1);
-                marked = existingFile;
-                markedNameNoMark = existingFileName;
-            }
-            // Checking if file name already exists.
-            if (newFileName.equals(existingFileName))
-                throw new IllegalArgumentException("Invalid file name.");
-        }
-
-        // Unmark previous marked file.
-        if(marked != null) {
-            File newFile = new File(mDataDirName + "/" + markedNameNoMark);
-            boolean result = marked.renameTo(newFile);
-        }
-
-        return "~" + newFileName;
-    }
-
-    /*
-    Automatically marks newly added file and unmarks old file. User must handle exceptions.
-     */
-    private static void writeFileOnInternalStorage(Context context, String fileName, String body) throws IOException, IllegalArgumentException {
-        File dir = new File(context.getFilesDir(),mDataDirName);
-        if(!dir.exists())
-            dir.mkdir();
-
-        File[] existingFiles = dir.listFiles();
-        fileName = processFileNames(existingFiles, fileName);
-        File dataFile = new File(dir, fileName);
-        FileWriter writer = new FileWriter(dataFile);
-        writer.append(body);
-        writer.flush();
-        writer.close();
-    }
-
     private class RunOptimizer extends AsyncTask<Double,Void,List<String>> {
         // Code to run in the background.
         // Void… params means to put the remaining arguments into an array of type Void named params.
@@ -254,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         protected List<String> doInBackground(Double... params) {
             double searchDouble = params[0];
             double compactPriority = params[1];
-            double[] resistances = mModel.getResistances();
+            double[] resistances = mModel.getResistancesArr();
             List<String> outputs = MainOptimizer.run(resistances, searchDouble, (int)compactPriority, 3000, 3, 50, -1);
             int numOutputs = outputs.size();
             int TOP = 10;
@@ -285,7 +250,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        if(mModel.getSize() != 0)
-            bundle.putDoubleArray(RESULTS, mModel.getResistances());
+        if(mModel.getSize() != 0) {
+            bundle.putDoubleArray(RESULTS, mModel.getResistancesArr());
+        }
     }
 }
