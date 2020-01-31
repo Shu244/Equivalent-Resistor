@@ -25,7 +25,7 @@ public class ResistorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
         // Do I need super? NO
-        View v = inflater.inflate(R.layout.transition_fragment, container, false);
+        View v = inflater.inflate(R.layout.resistor_fragment, container, false);
         mMessageTextView = v.findViewById(R.id.messageTextView);
         mRankerTextView = v.findViewById(R.id.rankerTextView);
         mInformationFAB = v.findViewById(R.id.informationFAB);

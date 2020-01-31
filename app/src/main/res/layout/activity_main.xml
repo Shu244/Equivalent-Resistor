@@ -42,12 +42,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/compact"
+                android:text="@string/accurate"
                 android:textSize="18sp" />
 
             <SeekBar
                 android:id="@+id/sizePrioritySeekBar"
                 android:layout_width="wrap_content"
+                android:progressDrawable="@android:color/transparent"
                 android:layout_height="wrap_content"
                 android:layout_weight="10"
                 android:max="100"
@@ -58,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/accurate"
+                android:text="@string/compact"
                 android:textSize="18sp" />
         </LinearLayout>
 

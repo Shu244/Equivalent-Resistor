@@ -6,6 +6,8 @@
     <string name="search_hint">Desired Resistance</string>
     <string name="no_resistors_message">Please Edit The Available Resistances.</string>
     <string name="wait">Please wait…</string>
+    <string name="ready">Ready to optimize.</string>
+
 
     <!-- Information dialog Strings.-->
     <string name="dialog_information_title">Extra Information</string>

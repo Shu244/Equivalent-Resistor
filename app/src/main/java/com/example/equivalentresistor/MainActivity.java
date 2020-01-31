@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,31 +58,23 @@ public class MainActivity extends AppCompatActivity {
 
         mModel = ResistorModel.getInstance();
         if(savedInstanceState != null) {
-            mModel.setResistances(savedInstanceState.getDoubleArray(RESULTS));
+            // There are old results to display
+            mResults = Arrays.asList(savedInstanceState.getStringArray(RESULTS));
+            setPagerWithResults();
         } else if (mModel.getSize() == 0) {
             // Data needs to be filled in.
             File dir = new File(getFilesDir(),mDataDirName);
             File[] dataFiles;
             if(dir.exists() && (dataFiles = dir.listFiles()).length != 0) {
                 // There's data to fill in.
-                // Adding a waiting screen to ViewPager.
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
-                    @Override
-                    public Fragment getItem(int position) {
-                        return TransitionFragment.getFragment(getResources().getString(R.string.wait));
-                    }
-
-                    @Override
-                    public int getCount() {
-                        return 1;
-                    }
-                });
                 fillModel(dataFiles);
             } else {
                 // There's no data to fill in. Disable search.
                 disableSearch();
             }
+        } else {
+            // Theres data in the model
+            setPagerWithMessage(getResources().getString(R.string.ready));
         }
 
         mSearchButton.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +84,9 @@ public class MainActivity extends AppCompatActivity {
                 String search = mSearchEditText.getText().toString();
                 try {
                     double searchDouble = Double.parseDouble(search);
+                    // Possible to have zero priority for size (focus on accuracy).
                     mSearchEditText.setTextColor(Color.GREEN);
+                    setPagerWithMessage(getResources().getString(R.string.wait));
                     new RunOptimizer().execute(searchDouble, (double)compactPriority);
                 } catch (NumberFormatException e) {
                     mSearchEditText.setTextColor(Color.RED);
@@ -128,6 +123,19 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public static void deleteAllData() {
+        File dir = new File(mDataDirName);
+        File[] dataFiles = dir.listFiles();
+        for(File file : dataFiles)
+            file.delete();
+        dir.delete();
+    }
+
+    public static void removeFile(String fileName) {
+        File file = new File(mDataDirName, fileName);
+        file.delete();
     }
 
     private File getMarkedFile(File[] dataFiles) throws Exception {
@@ -211,6 +219,38 @@ public class MainActivity extends AppCompatActivity {
         mSearchButton.setEnabled(false);
     }
 
+    private void setPagerWithResults() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+            @Override
+            public Fragment getItem(int position) {
+                String RPNMessage = mResults.get(position);
+                return ResistorFragment.getFragment(RPNMessage, position+1);
+            }
+
+            @Override
+            public int getCount() {
+                return mResults.size();
+            }
+        });
+    }
+
+    private void setPagerWithMessage(final String message) {
+        // Adding a waiting screen to ViewPager.
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+            @Override
+            public Fragment getItem(int position) {
+                return TransitionFragment.getFragment(message);
+            }
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        });
+    }
+
     private class RunOptimizer extends AsyncTask<Double,Void,List<String>> {
         // Code to run in the background.
         // Void… params means to put the remaining arguments into an array of type Void named params.
@@ -219,6 +259,8 @@ public class MainActivity extends AppCompatActivity {
         protected List<String> doInBackground(Double... params) {
             double searchDouble = params[0];
             double compactPriority = params[1];
+            Log.d(TAG, "Desired resistance: " + searchDouble);
+            Log.d(TAG, "Size priority: " + compactPriority);
             double[] resistances = mModel.getResistancesArr();
             List<String> outputs = MainOptimizer.run(resistances, searchDouble, (int)compactPriority, 3000, 3, 50, -1);
             int numOutputs = outputs.size();
@@ -231,19 +273,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<String> strings) {
             mResults = strings;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
-                @Override
-                public Fragment getItem(int position) {
-                    String RPNMessage = mResults.get(position);
-                    return ResistorFragment.getFragment(RPNMessage, position);
-                }
-
-                @Override
-                public int getCount() {
-                    return mResults.size();
-                }
-            });
+            setPagerWithResults();
         }
     }
 
@@ -251,7 +281,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         if(mModel.getSize() != 0) {
-            bundle.putDoubleArray(RESULTS, mModel.getResistancesArr());
+            String[] arr = mResults.toArray(new String[0]);
+            bundle.putStringArray(RESULTS, arr);
         }
     }
 }

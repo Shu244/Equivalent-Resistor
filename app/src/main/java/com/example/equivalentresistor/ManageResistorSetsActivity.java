@@ -31,7 +31,7 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
     private FloatingActionButton mDownloadFAB;
     private FloatingActionButton mAddFAB;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter<ResistorSetsViewHolder> adapter;
+    private RecyclerView.Adapter<ResistorSetsAdapter.ResistorSetsViewHolder> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +81,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         List<String> names = new ArrayList<>();
         for(File file : files) {
             String name = file.getName();
-            name = name.substring(0, name.indexOf('.')); // Removes extensions
+            int end = name.indexOf('.');
+            name = end == -1 ? name : name.substring(0, end); // Removes extensions
             if(name.charAt(0) == '~') // Removes tildes
                 name = name.substring(1);
             names.add(name);

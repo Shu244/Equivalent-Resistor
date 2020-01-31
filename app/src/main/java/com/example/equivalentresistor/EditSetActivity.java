@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import optimizer.Resistor;
-
 public class EditSetActivity extends AppCompatActivity {
 
     private final static String SET_NAME = "com.example.equvialentresistor.set_name";
@@ -41,27 +39,26 @@ public class EditSetActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_set);
 
         Intent i = getIntent();
         mSetName = i.getStringExtra(SET_NAME);
 
         setTitle("Edit set " + mSetName);
-        setContentView(R.layout.activity_edit_set);
 
-        mRecyclerView = findViewById(R.id.recyclerView);
-        mAddFAB = findViewById(R.id.addFAB);
+        mRecyclerView = findViewById(R.id.resistorsRecyclerView);
+        mAddFAB = findViewById(R.id.addResistorFAB);
         mSubmitButton = findViewById(R.id.submitSetButton);
 
+        mLegalValues = new ArrayList<>();
         try {
             mResistorEntries = getFileData(mSetName);
-            mLegalValues.clear();
             for(String[] _ : mResistorEntries) {
                 Boolean[] trueVals = {true, true};
                 mLegalValues.add(trueVals);
             }
         } catch (IOException e) {
             mResistorEntries = new ArrayList<>();
-            mLegalValues = new ArrayList<>();
         }
 
         mAdapter = new ResistorsAdapter(mResistorEntries, mLegalValues);
@@ -72,6 +69,7 @@ public class EditSetActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 mResistorEntries.add(new String[]{DEFAULT_R, DEFAULT_QTY});
+                mLegalValues.add(new Boolean[]{true, true});
                 mAdapter.notifyItemInserted(mResistorEntries.size() - 1);
             }
         });
@@ -80,6 +78,7 @@ public class EditSetActivity extends AppCompatActivity {
             {
                 List<Double> resistances = allDataLegal();
                 if(resistances != null) {
+                    // All inputted data are valid.
                     String fileBody = genFileBody();
                     try {
                         writeFileOnInternalStorage(v.getContext(), mSetName, fileBody);
@@ -89,6 +88,7 @@ public class EditSetActivity extends AppCompatActivity {
                         Toast.makeText(v.getContext(), getResources().getText(R.string.cant_write), Toast.LENGTH_LONG).show();
                     }
                 } else {
+                    // Some data are invalid
                     Toast.makeText(v.getContext(), getResources().getText(R.string.illegal_values), Toast.LENGTH_LONG).show();
                     // Show the red marks.
                     mAdapter.notifyDataSetChanged();
