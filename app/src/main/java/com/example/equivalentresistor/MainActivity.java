@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     double searchDouble = Double.parseDouble(search);
                     // Possible to have zero priority for size (focus on accuracy).
                     setPagerWithMessage(getResources().getString(R.string.wait));
+                    mSearchButton.setEnabled(false);
                     optimizer.execute(searchDouble, (double)compactPriority);
                 } catch (NumberFormatException e) {
                     mSearchEditText.setTextColor(Color.RED);
@@ -227,6 +228,12 @@ public class MainActivity extends AppCompatActivity {
                 return mResults.size();
             }
         });
+        optimizerFinished();
+    }
+
+    private void optimizerFinished() {
+        optimizer = new RunOptimizer();
+        mSearchButton.setEnabled(true);
     }
 
     private void setPagerWithMessage(final String message) {
