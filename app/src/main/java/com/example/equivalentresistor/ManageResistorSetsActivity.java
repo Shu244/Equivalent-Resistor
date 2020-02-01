@@ -13,10 +13,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -81,10 +83,12 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         List<String> names = new ArrayList<>();
         for(File file : files) {
             String name = file.getName();
-            int end = name.indexOf('.');
-            name = end == -1 ? name : name.substring(0, end); // Removes extensions
-            if(name.charAt(0) == '~') // Removes tildes
-                name = name.substring(1);
+            Log.d(TAG, "Name of a file: " + name);
+            // No need to remove any markings on file name.
+//            int end = name.indexOf('.');
+//            name = end == -1 ? name : name.substring(0, end); // Removes extensions
+//            if(name.charAt(0) == '~') // Removes tildes
+//                name = name.substring(1);
             names.add(name);
         }
         return names;
@@ -102,6 +106,7 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
                         setNameTextView.setTextColor(Color.BLACK);
                 }
             });
+            // Creating custom centered title
             final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
                     .setTitle(R.string.add_resistor_set_dialog_title)
@@ -118,7 +123,7 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
                     button.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            // setNameTextView.clearFocus(); // For smooth UI.
+                            setNameTextView.clearFocus(); // For smooth UI.
                             String newFileName = setNameTextView.getText().toString();
                             Log.d(TAG, "positive button clicked");
                             if(legalFileName(newFileName)) {

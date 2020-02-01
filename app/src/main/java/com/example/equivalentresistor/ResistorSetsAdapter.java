@@ -57,7 +57,9 @@ public class ResistorSetsAdapter extends RecyclerView.Adapter<ResistorSetsAdapte
                     if(pos < 0 || pos > mNames.size())
                         return;
                     String name = mNames.remove(pos);
-                    MainActivity.removeFile(name);
+                    if(name.charAt(0) == '~')
+                        ResistorModel.getInstance().setResistances(new double[0]);
+                    MainActivity.removeFile(v.getContext(), name);
                     mAdapter.notifyItemRemoved(pos);
                     mAdapter.notifyItemRangeChanged(pos, mNames.size());
                 }

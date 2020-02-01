@@ -44,7 +44,7 @@ public class EditSetActivity extends AppCompatActivity {
         Intent i = getIntent();
         mSetName = i.getStringExtra(SET_NAME);
 
-        setTitle("Edit set " + mSetName);
+        setTitle("Edit set: " + mSetName);
 
         mRecyclerView = findViewById(R.id.resistorsRecyclerView);
         mAddFAB = findViewById(R.id.addResistorFAB);
@@ -53,10 +53,8 @@ public class EditSetActivity extends AppCompatActivity {
         mLegalValues = new ArrayList<>();
         try {
             mResistorEntries = getFileData(mSetName);
-            for(String[] _ : mResistorEntries) {
-                Boolean[] trueVals = {true, true};
-                mLegalValues.add(trueVals);
-            }
+            for(String[] _ : mResistorEntries)
+                mLegalValues.add(new Boolean[]{true, true});
         } catch (IOException e) {
             mResistorEntries = new ArrayList<>();
         }
@@ -112,7 +110,7 @@ public class EditSetActivity extends AppCompatActivity {
                 return null;
             }
             try {
-                int qty = Integer.parseInt(entry[0]);
+                int qty = Integer.parseInt(entry[1]);
 
                 if(qty <= 0)
                     throw new NullPointerException();
@@ -129,7 +127,7 @@ public class EditSetActivity extends AppCompatActivity {
     }
 
     private List<String[]> getFileData(String fileName) throws IOException {
-        File dataFile = new File( MainActivity.mDataDirName + "/~" + fileName);
+        File dataFile = new File(this.getFilesDir() , MainActivity.mDataDirName + "/" + fileName);
         if(!dataFile.exists()) {
             return new ArrayList<>();
         } else {
@@ -148,7 +146,12 @@ public class EditSetActivity extends AppCompatActivity {
         }
     }
 
-    private static String processFileNames(File[] existingFiles, String newFileName) throws IllegalArgumentException {
+    private static String processFileNames(Context context, File[] existingFiles, String fileName) throws IllegalArgumentException {
+        if(fileName.charAt(0) == '~') {
+            // No need to unmark an existing file or mark a new file.
+            return fileName;
+        }
+
         File marked = null;
         String markedNameNoMark = "";
         for(File existingFile : existingFiles) {
@@ -163,11 +166,11 @@ public class EditSetActivity extends AppCompatActivity {
 
         // Unmark previous marked file.
         if(marked != null) {
-            File newFile = new File(MainActivity.mDataDirName + "/" + markedNameNoMark);
+            File newFile = new File(context.getFilesDir(), MainActivity.mDataDirName + "/" + markedNameNoMark);
             boolean result = marked.renameTo(newFile);
         }
 
-        return "~" + newFileName;
+        return "~" + fileName;
     }
 
     /*
@@ -178,8 +181,11 @@ public class EditSetActivity extends AppCompatActivity {
         if(!dir.exists())
             dir.mkdir();
 
-        File[] existingFiles = dir.listFiles();
-        fileName = processFileNames(existingFiles, fileName);
+        if(fileName.charAt(0) != '~') {
+            boolean result = new File(dir, fileName).delete();
+            File[] existingFiles = dir.listFiles();
+            fileName = processFileNames(context, existingFiles, fileName);
+        }
         File dataFile = new File(dir, fileName);
         FileWriter writer = new FileWriter(dataFile);
         writer.append(body);
@@ -189,7 +195,6 @@ public class EditSetActivity extends AppCompatActivity {
 
     private String genFileBody() {
         StringBuilder strB = new StringBuilder();
-        strB.append(mResistorEntries.size() + "\n");
         for(String[] entry : mResistorEntries)
             strB.append(entry[0] + " " + entry[1] + "\n");
         return strB.toString();
@@ -200,4 +205,12 @@ public class EditSetActivity extends AppCompatActivity {
         i.putExtra(SET_NAME, setName);
         return i;
     }
+
+//    @Override
+//    protected void onSaveInstanceState(Bundle bundle) {
+//        super.onSaveInstanceState(bundle);
+//        String[][] arr = mResistorEntries.toArray(new String[0][]);
+//        bundle.putStringArray(RESULTS, arr);
+//
+//    }
 }

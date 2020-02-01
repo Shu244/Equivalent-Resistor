@@ -1,6 +1,7 @@
 package com.example.equivalentresistor;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.ResistorsViewHolder> {
+    private final static String TAG = "ResistorsAdapter";
+
     private List<String[]> mResistorEntries;
     private List<Boolean[]> mLegalValues;
 
@@ -35,12 +38,6 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
     @Override
     public int getItemCount() {
         return mResistorEntries.size();
-    }
-
-    public void removeAt(int position) {
-        mResistorEntries.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, mResistorEntries.size());
     }
 
     public static class ResistorsViewHolder extends RecyclerView.ViewHolder {
@@ -72,15 +69,29 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
                     mAdapter.notifyItemRangeChanged(pos, mResistorEntries.size());
                 }
             });
-            itemView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            mOhmsEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAA");
+                    if(hasFocus) {
+                        mOhmsEditText.setTextColor(Color.BLACK);
+                    } else {
+                        Log.d(TAG, "Focus off ohms editor");
+                        String ohms = mOhmsEditText.getText().toString();
+                        String qty = mResistorEntries.get(getAdapterPosition())[1];
+                        mResistorEntries.set(getAdapterPosition(), new String[]{ohms, qty});
+                    }
+                }
+            });
+            mQtyEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
                     if(hasFocus) {
-                        mOhmsEditText.setTextColor(Color.BLACK);
                         mQtyEditText.setTextColor(Color.BLACK);
                     } else {
-                        String ohms = mOhmsEditText.getText().toString();
+                        Log.d(TAG, "Focus off qty editor");
                         String qty = mQtyEditText.getText().toString();
+                        String ohms = mResistorEntries.get(getAdapterPosition())[0];
                         mResistorEntries.set(getAdapterPosition(), new String[]{ohms, qty});
                     }
                 }

@@ -68,9 +68,11 @@ public class MainActivity extends AppCompatActivity {
             if(dir.exists() && (dataFiles = dir.listFiles()).length != 0) {
                 // There's data to fill in.
                 fillModel(dataFiles);
+                setPagerWithMessage(getResources().getString(R.string.ready));
             } else {
                 // There's no data to fill in. Disable search.
                 disableSearch();
+                setPagerWithMessage(getResources().getString(R.string.no_resistors_message));
             }
         } else {
             // Theres data in the model
@@ -80,12 +82,15 @@ public class MainActivity extends AppCompatActivity {
         mSearchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
+                mSearchEditText.clearFocus();
                 int compactPriority = mSizePrioritySeekBar.getProgress();
+                if(compactPriority == 100)
+                    // If compactPriority = 0, one resistor is returned pretty much regardless of accuracy.
+                    compactPriority = 99;
                 String search = mSearchEditText.getText().toString();
                 try {
                     double searchDouble = Double.parseDouble(search);
                     // Possible to have zero priority for size (focus on accuracy).
-                    mSearchEditText.setTextColor(Color.GREEN);
                     setPagerWithMessage(getResources().getString(R.string.wait));
                     new RunOptimizer().execute(searchDouble, (double)compactPriority);
                 } catch (NumberFormatException e) {
@@ -125,16 +130,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void deleteAllData() {
-        File dir = new File(mDataDirName);
+    public static void deleteAllData(Context context) {
+        File dir = new File(context.getFilesDir(), mDataDirName);
         File[] dataFiles = dir.listFiles();
         for(File file : dataFiles)
             file.delete();
         dir.delete();
     }
 
-    public static void removeFile(String fileName) {
-        File file = new File(mDataDirName, fileName);
+    public static void removeFile(Context context, String fileName) {
+        File file = new File(context.getFilesDir(), mDataDirName + "/" + fileName);
         file.delete();
     }
 
@@ -147,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "getMarkedFile: No marked files even though one should be marked.");
         File first = dataFiles[0];
-        File newFile = new File(mDataDirName + "/~" + first.getName());
+        File newFile = new File(this.getFilesDir(), mDataDirName + "/~" + first.getName());
         boolean result = first.renameTo(newFile);
         if(!result)
             throw new Exception();
@@ -201,19 +206,6 @@ public class MainActivity extends AppCompatActivity {
     Disables options to search since no data is available.
      */
     private void disableSearch() {
-        // Fill ViewPager with fragment to display no resistance.
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
-            @Override
-            public Fragment getItem(int position) {
-                return TransitionFragment.getFragment(getResources().getString(R.string.no_resistors_message));
-            }
-
-            @Override
-            public int getCount() {
-                return 1;
-            }
-        });
         mSizePrioritySeekBar.setEnabled(false);
         mSearchEditText.setEnabled(false);
         mSearchButton.setEnabled(false);
@@ -280,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        if(mModel.getSize() != 0) {
+        if(mResults.size() != 0) {
             String[] arr = mResults.toArray(new String[0]);
             bundle.putStringArray(RESULTS, arr);
         }

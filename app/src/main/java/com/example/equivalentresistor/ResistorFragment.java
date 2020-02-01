@@ -1,8 +1,11 @@
 package com.example.equivalentresistor;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,13 +63,23 @@ public class ResistorFragment extends Fragment {
         return frag;
     }
 
+    private static TextView customCenteredTitle(Context context) {
+        TextView title = new TextView(context);
+        title.setText(R.string.dialog_information_title);
+        title.setPadding(10, 10, 10, 10);
+        title.setGravity(Gravity.CENTER);
+        title.setTextSize(20);
+        title.setTextColor(Color.BLACK);
+        return title;
+    }
+
     public static class InformationDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.information_dialog, null);
             return new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
-                    .setTitle(R.string.dialog_information_title)
+                    .setCustomTitle(customCenteredTitle(getActivity()))
                     // null can be DialogInterface.OnClickListener
                     .setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
                         @Override
