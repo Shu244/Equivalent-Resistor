@@ -91,6 +91,7 @@ public class EditSetActivity extends AppCompatActivity {
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
+                clearHoldersFocus();
                 List<Double> resistances = allDataLegal();
                 if(resistances != null && resistances.size() != 0) {
                     // All inputted data are valid.
@@ -110,6 +111,12 @@ public class EditSetActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void clearHoldersFocus() {
+        List<ResistorsAdapter.ResistorsViewHolder> holders = mAdapter.getHolders();
+        for (ResistorsAdapter.ResistorsViewHolder holder : holders)
+            holder.itemView.clearFocus();
     }
 
     private List<Double> allDataLegal() {

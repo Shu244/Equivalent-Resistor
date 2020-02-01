@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.ResistorsViewHolder> {
@@ -18,16 +19,24 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
     private List<String[]> mResistorEntries;
     private List<Boolean[]> mLegalValues;
 
+    private List<ResistorsViewHolder> mHolders;
+
     public ResistorsAdapter(List<String[]> resistorEntries, List<Boolean[]> legalValues) {
         mResistorEntries = resistorEntries;
         mLegalValues = legalValues;
+        mHolders = new ArrayList<>();
+    }
+
+    public List<ResistorsViewHolder> getHolders() {
+        return mHolders;
     }
 
     @Override
     public ResistorsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.resistance_entry_viewholder, parent, false);
-        return new ResistorsViewHolder(v, mResistorEntries, mLegalValues, this);
-        // Create ViewHolder here and set listener here.
+        ResistorsViewHolder holder = new ResistorsViewHolder(v, mResistorEntries, mLegalValues, this);
+        mHolders.add(holder);
+        return holder;
     }
 
     @Override
