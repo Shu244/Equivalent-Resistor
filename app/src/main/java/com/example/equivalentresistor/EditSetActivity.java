@@ -69,7 +69,8 @@ public class EditSetActivity extends AppCompatActivity {
         } else {
             try {
                 mResistorEntries = getFileData(mSetName);
-                trueLegals();
+                for(String[] _ : mResistorEntries)
+                    mLegalValues.add(new Boolean[]{true, true});
             } catch (IOException e) {
                 Log.d(TAG, "Mal-formatted file was saved somehow");
             }
@@ -111,20 +112,14 @@ public class EditSetActivity extends AppCompatActivity {
         });
     }
 
-    private void trueLegals() {
-        mLegalValues.clear();
-        for(String[] _ : mResistorEntries)
-            mLegalValues.add(new Boolean[]{true, true});
-    }
-
     private List<Double> allDataLegal() {
-        trueLegals();
+        boolean returnNull = false;
         int size = mResistorEntries.size();
         List<Double> resistances = new ArrayList<>();
         for(int i = 0; i < size; i++) {
             String[] entry = mResistorEntries.get(i);
             Boolean[] legals = mLegalValues.get(i);
-            double resistance;
+            double resistance = 0;
             try {
                 resistance = Double.parseDouble(entry[0]);
                 if(resistance <= 0)
@@ -132,20 +127,22 @@ public class EditSetActivity extends AppCompatActivity {
                 legals[0] = true;
             } catch(NumberFormatException e) {
                 legals[0] = false;
-                return null;
+                returnNull = true;
             }
             try {
                 int qty = Integer.parseInt(entry[1]);
                 if(qty <= 0)
                     throw new NumberFormatException();
                 legals[1] = true;
-                for(int qty_i = 0; qty_i  <qty; qty_i++)
+                for(int qty_i = 0;legals[0] &&  qty_i  <qty; qty_i++)
                     resistances.add(resistance);
             } catch(NumberFormatException e) {
                 legals[1] = false;
-                return null;
+                returnNull = true;
             }
         }
+        if(returnNull)
+            return null;
         return resistances;
     }
 
