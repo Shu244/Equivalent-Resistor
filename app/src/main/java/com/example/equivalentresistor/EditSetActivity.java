@@ -69,8 +69,7 @@ public class EditSetActivity extends AppCompatActivity {
         } else {
             try {
                 mResistorEntries = getFileData(mSetName);
-                for (String[] _ : mResistorEntries)
-                    mLegalValues.add(new Boolean[]{true, true});
+                trueLegals();
             } catch (IOException e) {
                 Log.d(TAG, "Mal-formatted file was saved somehow");
             }
@@ -112,7 +111,14 @@ public class EditSetActivity extends AppCompatActivity {
         });
     }
 
+    private void trueLegals() {
+        mLegalValues.clear();
+        for(String[] _ : mResistorEntries)
+            mLegalValues.add(new Boolean[]{true, true});
+    }
+
     private List<Double> allDataLegal() {
+        trueLegals();
         int size = mResistorEntries.size();
         List<Double> resistances = new ArrayList<>();
         for(int i = 0; i < size; i++) {
@@ -121,6 +127,8 @@ public class EditSetActivity extends AppCompatActivity {
             double resistance;
             try {
                 resistance = Double.parseDouble(entry[0]);
+                if(resistance <= 0)
+                    throw new NumberFormatException();
                 legals[0] = true;
             } catch(NumberFormatException e) {
                 legals[0] = false;
@@ -128,10 +136,8 @@ public class EditSetActivity extends AppCompatActivity {
             }
             try {
                 int qty = Integer.parseInt(entry[1]);
-
                 if(qty <= 0)
-                    throw new NullPointerException();
-
+                    throw new NumberFormatException();
                 legals[1] = true;
                 for(int qty_i = 0; qty_i  <qty; qty_i++)
                     resistances.add(resistance);

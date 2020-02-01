@@ -72,9 +72,11 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
             mOhmsEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAA");
+                    if(!(getAdapterPosition() >= 0))
+                        return;
                     if(hasFocus) {
                         mOhmsEditText.setTextColor(Color.BLACK);
+                        Log.d(TAG, "Focus on ohms editor");
                     } else {
                         Log.d(TAG, "Focus off ohms editor");
                         String ohms = mOhmsEditText.getText().toString();
@@ -86,8 +88,11 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
             mQtyEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
+                    if(!(getAdapterPosition() >= 0))
+                        return;
                     if(hasFocus) {
                         mQtyEditText.setTextColor(Color.BLACK);
+                        Log.d(TAG, "Focus on qty editor");
                     } else {
                         Log.d(TAG, "Focus off qty editor");
                         String qty = mQtyEditText.getText().toString();
