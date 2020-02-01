@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mSearchButton;
 
     private List<String> mResults = new ArrayList<>();
+    private RunOptimizer optimizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         mSizePrioritySeekBar = findViewById(R.id.sizePrioritySeekBar);
         mSearchEditText = findViewById(R.id.searchEditText);
         mSearchButton = findViewById(R.id.searchButton);
+        optimizer = new RunOptimizer();
 
         mModel = ResistorModel.getInstance();
         if(savedInstanceState != null) {
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     double searchDouble = Double.parseDouble(search);
                     // Possible to have zero priority for size (focus on accuracy).
                     setPagerWithMessage(getResources().getString(R.string.wait));
-                    new RunOptimizer().execute(searchDouble, (double)compactPriority);
+                    optimizer.execute(searchDouble, (double)compactPriority);
                 } catch (NumberFormatException e) {
                     mSearchEditText.setTextColor(Color.RED);
                 }
@@ -276,5 +278,11 @@ public class MainActivity extends AppCompatActivity {
             String[] arr = mResults.toArray(new String[0]);
             bundle.putStringArray(RESULTS, arr);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        optimizer.cancel(false);
     }
 }
