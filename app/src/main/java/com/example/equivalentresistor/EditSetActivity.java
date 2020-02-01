@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -23,7 +24,13 @@ import java.util.List;
 
 public class EditSetActivity extends AppCompatActivity {
 
+    private final static String TAG = "EditSetActivity";
     private final static String SET_NAME = "com.example.equvialentresistor.set_name";
+    private final static String OHM_ENTRIES = "com.example.equvialentresistor.ohm_entries";
+    private final static String QTY_ENTRIES = "com.example.equvialentresistor.qty_entries";
+    private final static String OHM_ERRORS = "com.example.equvialentresistor.ohm_errors";
+    private final static String QTY_ERRORS = "com.example.equvialentresistor.qty_errors";
+
     private final static String DEFAULT_R = "1000"; // Ohms
     private final static String DEFAULT_QTY = "1"; // Ohms
 
@@ -49,14 +56,24 @@ public class EditSetActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.resistorsRecyclerView);
         mAddFAB = findViewById(R.id.addResistorFAB);
         mSubmitButton = findViewById(R.id.submitSetButton);
-
         mLegalValues = new ArrayList<>();
-        try {
-            mResistorEntries = getFileData(mSetName);
-            for(String[] _ : mResistorEntries)
-                mLegalValues.add(new Boolean[]{true, true});
-        } catch (IOException e) {
-            mResistorEntries = new ArrayList<>();
+        mResistorEntries = new ArrayList<>();
+
+        if(savedInstanceState != null) {
+            String[] ohmEntries = savedInstanceState.getStringArray(OHM_ENTRIES);
+            String[] qtyEntries = savedInstanceState.getStringArray(QTY_ENTRIES);
+            boolean[] ohmErrors = savedInstanceState.getBooleanArray(OHM_ERRORS);
+            boolean[] qtyErrors = savedInstanceState.getBooleanArray(QTY_ERRORS);
+            fillEntryArrays(new String[][]{ohmEntries, qtyEntries});
+            fillErrorArrays(new boolean[][]{ohmErrors, qtyErrors});
+        } else {
+            try {
+                mResistorEntries = getFileData(mSetName);
+                for (String[] _ : mResistorEntries)
+                    mLegalValues.add(new Boolean[]{true, true});
+            } catch (IOException e) {
+                Log.d(TAG, "Mal-formatted file was saved somehow");
+            }
         }
 
         mAdapter = new ResistorsAdapter(mResistorEntries, mLegalValues);
@@ -75,7 +92,7 @@ public class EditSetActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 List<Double> resistances = allDataLegal();
-                if(resistances != null) {
+                if(resistances != null && resistances.size() != 0) {
                     // All inputted data are valid.
                     String fileBody = genFileBody();
                     try {
@@ -87,7 +104,7 @@ public class EditSetActivity extends AppCompatActivity {
                     }
                 } else {
                     // Some data are invalid
-                    Toast.makeText(v.getContext(), getResources().getText(R.string.illegal_values), Toast.LENGTH_LONG).show();
+                    Toast.makeText(v.getContext(), getResources().getText(R.string.cannot_save), Toast.LENGTH_LONG).show();
                     // Show the red marks.
                     mAdapter.notifyDataSetChanged();
                 }
@@ -206,11 +223,57 @@ public class EditSetActivity extends AppCompatActivity {
         return i;
     }
 
-//    @Override
-//    protected void onSaveInstanceState(Bundle bundle) {
-//        super.onSaveInstanceState(bundle);
-//        String[][] arr = mResistorEntries.toArray(new String[0][]);
-//        bundle.putStringArray(RESULTS, arr);
-//
-//    }
+    private String[][] getEntryArrays() { ;
+        int size = mResistorEntries.size();
+        String[] ohms = new String[size];
+        String[] qty = new String[size];
+        for(int i = 0; i < size; i ++) {
+            String[] entry = mResistorEntries.get(i);
+            ohms[i] = entry[0];
+            qty[i] = entry[1];
+        }
+        return new String[][]{ohms, qty};
+    }
+
+    private boolean[][] getErrorArrays() {
+        int size = mLegalValues.size();
+        boolean[] ohmsLegal = new boolean[size];
+        boolean[] qtyLegal = new boolean[size];
+        for(int i = 0; i < size; i ++) {
+            Boolean[] entry = mLegalValues.get(i);
+            ohmsLegal[i] = entry[0];
+            qtyLegal[i] = entry[1];
+        }
+        return new boolean[][]{ohmsLegal, qtyLegal};
+    }
+
+    private void fillEntryArrays(String[][] entryArrs) {
+        String[] ohmEntries = entryArrs[0];
+        String[] qtyEntries = entryArrs[1];
+        int size = ohmEntries.length;
+        for(int i = 0; i < size; i ++)
+            mResistorEntries.add(new String[]{ohmEntries[i], qtyEntries[i]});
+    }
+
+    private void fillErrorArrays(boolean[][] errorArrs) {
+        boolean[] ohmErrors = errorArrs[0];
+        boolean[] qtyErrors = errorArrs[1];
+        int size = ohmErrors.length;
+        for(int i = 0; i < size; i ++)
+            mLegalValues.add(new Boolean[]{ohmErrors[i], qtyErrors[i]});
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        int size = mResistorEntries.size();
+        if(size != 0) {
+            String[][] entryArrs = getEntryArrays();
+            boolean[][] errorArrs = getErrorArrays();
+            bundle.putStringArray(OHM_ENTRIES, entryArrs[0]);
+            bundle.putStringArray(QTY_ENTRIES, entryArrs[1]);
+            bundle.putBooleanArray(OHM_ERRORS, errorArrs[0]);
+            bundle.putBooleanArray(QTY_ERRORS, errorArrs[1]);
+        }
+    }
 }

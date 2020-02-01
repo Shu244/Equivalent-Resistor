@@ -5,7 +5,7 @@ import optimizer.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setPagerWithResults() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+        mViewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
                 String RPNMessage = mResults.get(position);
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
     private void setPagerWithMessage(final String message) {
         // Adding a waiting screen to ViewPager.
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+        mViewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
                 return TransitionFragment.getFragment(message);

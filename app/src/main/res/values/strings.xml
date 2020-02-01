@@ -32,5 +32,5 @@
     <string name="default_qty">1</string>
     <string name="submit">submit</string>
     <string name="cant_write">Cannot save file for some reason</string>
-    <string name="illegal_values">Cannot save illegal values</string>
+    <string name="cannot_save">Cannot save values</string>
 </resources>
