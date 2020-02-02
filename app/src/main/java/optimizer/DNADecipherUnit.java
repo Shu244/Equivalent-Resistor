@@ -49,12 +49,12 @@ public class DNADecipherUnit {
         return mVisual;
     }
 
-    public void combine(DNADecipherUnit unit, int operator, boolean icludeParenthesis) {
+    public void combine(DNADecipherUnit unit, int operator, boolean includeParenthesis) {
         String operatorStr = "P";
         if(operator == Resistor.SERIES)
             operatorStr = "S";
         mVisual = String.format("%s --%s--> %s", mVisual, operatorStr, unit.mVisual);
-        if(icludeParenthesis)
+        if(includeParenthesis)
             mVisual = "(" + mVisual + ")";
     }
 }
