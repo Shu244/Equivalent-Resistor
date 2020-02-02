@@ -1,5 +1,6 @@
 package com.example.equivalentresistor;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
@@ -38,9 +39,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
     private FloatingActionButton mDownloadFAB;
     private FloatingActionButton mAddFAB;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter<ResistorSetsAdapter.ResistorSetsViewHolder> adapter;
-    private DownloadData mBackground;
-    private DownloadSetDialog mDownloadDialog;
+    private RecyclerView.Adapter<ResistorSetsAdapter.ResistorSetsViewHolder> mAdapter;
+    private DownloadSetDialog mDownloadSetDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,17 +52,14 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         mAddFAB = findViewById(R.id.addFAB);
         mRecyclerView = findViewById(R.id.recyclerView);
 
-        adapter = new ResistorSetsAdapter(getDataFileNames(getDataFiles(this)));
-        mRecyclerView.setAdapter(adapter);
+        mAdapter = new ResistorSetsAdapter(getDataFileNames(getDataFiles(this)));
+        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mDownloadFAB.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
-                mBackground = new DownloadData();
-                mDownloadDialog = new DownloadSetDialog();
-                GetURLDialog getURL = new GetURLDialog(mBackground, mDownloadDialog);
-                getURL.show(getSupportFragmentManager(), "");
+                new GetURLDialog().show(getSupportFragmentManager(), "");
             }
         });
         mAddFAB.setOnClickListener(new View.OnClickListener() {
@@ -160,14 +157,6 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
     }
 
     public static class GetURLDialog extends DialogFragment {
-        private DownloadData mBackground;
-        private DownloadSetDialog mDownloadDialog;
-
-        public GetURLDialog(DownloadData background, DownloadSetDialog downloadDialog) {
-            mBackground = background;
-            mDownloadDialog = downloadDialog;
-        }
-
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.get_url_dialog, null);
@@ -192,8 +181,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
                             String url = urlEditText.getText().toString();
                             Log.d(TAG, "URL: " + url);
                             dialog.dismiss();
-                            mDownloadDialog.setValues(mBackground, url);
-                            mDownloadDialog.show(getFragmentManager(), "");
+                            DownloadSetDialog downloadSetDialog = new DownloadSetDialog(url);
+                            downloadSetDialog.show(getFragmentManager(), "");
                         }
                     });
                 }
@@ -202,17 +191,44 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         }
     }
 
-    public static class DownloadSetDialog extends DialogFragment {
-        private DownloadData mBackground;
-        private String mUrl;
+    private DownloadData getDownloadDataInstance() {
+        return new DownloadData();
+    }
 
-        public void setValues(DownloadData background, String url) {
-            mBackground = background;
+    private void setDownloadSetDialog(DownloadSetDialog dialog) {
+        mDownloadSetDialog = dialog;
+    }
+
+    public static class DownloadSetDialog extends DialogFragment {
+        private static final String URL = "url";
+        private String mUrl;
+        private DownloadData mBackground;
+
+        public DownloadSetDialog(String url) {
             mUrl = url;
+        }
+
+        public DownloadSetDialog() {
+            // Empty constructor needed for FragManager to rebuild dialog.
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            super.onSaveInstanceState(outState);
+            outState.putString(URL, mUrl);
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            if(mBackground != null)
+                mBackground.cancel(false);
         }
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            if(savedInstanceState != null)
+                mUrl = savedInstanceState.getString(URL);
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.downloading_dialog, null);
             // Creating custom centered title
             final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
@@ -226,6 +242,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
                 @Override
                 public void onShow(DialogInterface dialogInterface) {
                     // Completing task in the background.
+                    ManageResistorSetsActivity activity = (ManageResistorSetsActivity)getActivity();
+                    mBackground = activity.getDownloadDataInstance();
                     mBackground.execute(mUrl);
 
                     // Defining negative button listener
@@ -239,6 +257,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
                     });
                 }
             });
+            ManageResistorSetsActivity activity = (ManageResistorSetsActivity)getActivity();
+            activity.setDownloadSetDialog(this);
             return dialog;
         }
     }
@@ -303,19 +323,14 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
     }
 
     private void downloadFail() {
-        mDownloadDialog.dismiss();
+        if(mDownloadSetDialog != null) {
+            mDownloadSetDialog.dismiss();
+        }
         Toast.makeText(this, getResources().getText(R.string.cant_download), Toast.LENGTH_LONG).show();
 
     }
 
     private void downloadSuccessful(String fileName) {
         startActivity(EditSetActivity.getIntent(this, fileName));
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(mBackground != null)
-            mBackground.cancel(false);
     }
 }
