@@ -21,44 +21,65 @@ public class ResistorFragment extends Fragment {
     private TextView mMessageTextView;
     private TextView mRankerTextView;
     private FloatingActionButton mInformationFAB;
+    private FloatingActionButton mReturnToFrontFAB;
 
-    private static final String mMessage = "com.example.equivalentresistor.resistor_message";
-    private static final String mRank = "com.example.equivalentresistor.rank";
+    private String mVisual;
+    private double mGoalR;
+    private double mTotalResistance;
+    private int mRank;
+    private int mSize;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-        // Do I need super? NO
+        super.onCreateView(inflater, container, bundle);
+        // When screen rotates, the arrays are saved in MainActivity but the values in here are destroyed.
+        // This is a temporary gimmick to use.
+        setRetainInstance(true);
         View v = inflater.inflate(R.layout.resistor_fragment, container, false);
         mMessageTextView = v.findViewById(R.id.messageTextView);
         mRankerTextView = v.findViewById(R.id.rankerTextView);
         mInformationFAB = v.findViewById(R.id.informationFAB);
+        mReturnToFrontFAB = v.findViewById(R.id.returnToFrontFAB);
 
-        Bundle args = getArguments();
-        mMessageTextView.setText(args.getString(mMessage));
-        mRankerTextView.setText(args.getInt(mRank) + "");
-
+        mMessageTextView.setText(injectPreference(mVisual, mTotalResistance));
+        if(mRank == 1)
+            mReturnToFrontFAB.hide();
+        mRankerTextView.setText(mRank + "");
         return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        // Do I need supper?
         super.onActivityCreated(savedInstanceState);
         mInformationFAB.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
-                new InformationDialog().show(getFragmentManager(), "");
+                double diff = Math.abs(mGoalR - mTotalResistance);
+                InformationDialog dialog = InformationDialog.getDialog(mTotalResistance, diff, mRank, mSize);
+               dialog.show(getFragmentManager(), "");
+            }
+        });
+        mReturnToFrontFAB.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v)
+            {
+                MainActivity main = (MainActivity)getActivity();
+                main.setResultsPagerToFront();
             }
         });
     }
 
-    public static ResistorFragment getFragment(String message, int rank) {
+    private String injectPreference(String visual, double totalResistance) {
+        return String.format("%s \n\n Total: %.1f ohms", visual, totalResistance);
+    }
+
+    public static ResistorFragment getFragment(String visual, double goal, double totalResistance, int rank, int size) {
         ResistorFragment frag = new ResistorFragment();
 
-        Bundle args = new Bundle();
-        args.putString(mMessage, message);
-        args.putInt(mRank, rank);
-        frag.setArguments(args);
+        frag.mVisual = visual;
+        frag.mGoalR = goal;
+        frag.mTotalResistance = totalResistance;
+        frag.mRank = rank;
+        frag.mSize = size;
 
         return frag;
     }
@@ -74,9 +95,31 @@ public class ResistorFragment extends Fragment {
     }
 
     public static class InformationDialog extends DialogFragment {
+
+        private static final String DIFF = "com.example.equivalentresistor.diff";
+        private static final String TOTAL_RESISTANCE = "com.example.equivalentresistor.total_resistance";
+        private static final String RANK = "com.example.equivalentresistor.rank";
+        private static final String SIZE = "com.example.equivalentresistor.size";
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             View v = LayoutInflater.from(getActivity()).inflate(R.layout.information_dialog, null);
+
+            Bundle args = getArguments();
+            double ohms = args.getDouble(TOTAL_RESISTANCE);
+            double diff = args.getDouble(DIFF);
+            int rank = args.getInt(RANK);
+            int size = args.getInt(SIZE);
+
+            TextView ohmsView = v.findViewById(R.id.resistanceTextView);
+            ohmsView.setText(String.format("%.1f", ohms));
+            TextView diffView = v.findViewById(R.id.diffTextView);
+            diffView.setText(String.format("%.1f", diff));
+            TextView rankView = v.findViewById(R.id.rankTextView);
+            rankView.setText(rank + "");
+            TextView sizeView = v.findViewById(R.id.sizeTextView);
+            sizeView.setText(size + "");
+
             return new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
                     .setCustomTitle(customCenteredTitle(getActivity()))
@@ -88,6 +131,20 @@ public class ResistorFragment extends Fragment {
                         }
                     })
                     .create();
+        }
+
+        public static InformationDialog getDialog(double ohms, double diff, int rank, int size) {
+            InformationDialog dialog = new InformationDialog();
+
+            // Supply num input as an argument.
+            Bundle args = new Bundle();
+            args.putDouble(TOTAL_RESISTANCE, ohms);
+            args.putDouble(DIFF, diff);
+            args.putInt(RANK, rank);
+            args.putInt(SIZE, size);
+            dialog.setArguments(args);
+
+            return dialog;
         }
     }
 

@@ -41,4 +41,24 @@ public class MainOptimizer {
                 popSize, mutationRate, numGen, initialDNA);
         return optimize(geneticAlgo, numTop);
     }
+
+
+    private static List<Queue<DNADecipherUnit>> optimizeAndGetQueues(EvolveOptimalResistors geneticAlgo, int numTop) {
+        System.out.println("Evolving resistors.");
+        geneticAlgo.evolve();
+        System.out.println("Resistors evolved.");
+        List<Queue<DNADecipherUnit>> queues = geneticAlgo.uniqueMostFitQueues(numTop);
+        System.out.println("------------End--------------");
+        return queues;
+    }
+
+
+    public static List<Queue<DNADecipherUnit>> runAndGetQueues(double[] resistances, double desiredResistance, int sizePriority, int popSize, int mutationRate, int numGen, int numTop) {
+        GreedySubcircuits greedyAlgo = genSubsDNA(resistances, desiredResistance);
+        Resistor[] availableResistors = greedyAlgo.getFormattedResistances();
+        DNA[] initialDNA = greedyAlgo.getDNA();
+        EvolveOptimalResistors geneticAlgo = new EvolveOptimalResistors(availableResistors, desiredResistance, sizePriority,
+                popSize, mutationRate, numGen, initialDNA);
+        return optimizeAndGetQueues(geneticAlgo, numTop);
+    }
 }

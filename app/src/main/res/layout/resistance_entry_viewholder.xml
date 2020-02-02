@@ -23,6 +23,12 @@
         android:selectAllOnFocus="true"
         android:text="@string/default_resistance" />
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,6 +43,11 @@
         android:selectAllOnFocus="true"
         android:inputType="number"
         android:text="@string/default_qty" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <ImageButton
         android:id="@+id/deleteButton"

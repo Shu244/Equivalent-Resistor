@@ -28,14 +28,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String mDataDirName = "data";
     public static final String TAG = "MainActivity";
-    public static final String RESULTS = "com.example.equivalentresistor.results";
+    private static final String VISUALS = "com.example.equivalentresistor.visuals";
+    private static final String TOTAL_RESISTANCES = "com.example.equivalentresistor.total_resistances";
+    private static final String RANKS = "com.example.equivalentresistor.ranks";
+    private static final String SIZES = "com.example.equivalentresistor.sizes";
+    private static final String GOAL = "com.example.equivalentresistor.goal";
+    public static final String SEARCH = "com.example.equivalentresistor.searchs";
+
 
     private ResistorModel mModel;
 
@@ -44,7 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView mSearchEditText;
     private Button mSearchButton;
 
-    private List<String> mResults = new ArrayList<>();
+    private String[] mVisuals = new String[0];
+    private double[] mTotalResistances = new double[0];
+    private int[] mRanks = new int[0];
+    private int[] mSizes = new int[0];
+    private double mGoalResistance;
     private RunOptimizer optimizer;
 
     @Override
@@ -56,12 +66,28 @@ public class MainActivity extends AppCompatActivity {
         mSizePrioritySeekBar = findViewById(R.id.sizePrioritySeekBar);
         mSearchEditText = findViewById(R.id.searchEditText);
         mSearchButton = findViewById(R.id.searchButton);
-        optimizer = new RunOptimizer();
 
         mModel = ResistorModel.getInstance();
+        String[] tempVisuals = null;
+        double[] tempResistances = null;
+        int[] tempRanks = null;
+        int[] tempSizes = null;
         if(savedInstanceState != null) {
+            tempVisuals = savedInstanceState.getStringArray(VISUALS);
+            tempResistances = savedInstanceState.getDoubleArray(TOTAL_RESISTANCES);
+            tempRanks = savedInstanceState.getIntArray(RANKS);
+            tempSizes = savedInstanceState.getIntArray(SIZES);
+            mGoalResistance = savedInstanceState.getDouble(GOAL, 0);
+
+            String search = savedInstanceState.getString(SEARCH, "");
+            mSearchEditText.setText(search);
+        }
+        if(tempVisuals != null && tempResistances != null && tempRanks != null && tempSizes != null) {
             // There are old results to display
-            mResults = Arrays.asList(savedInstanceState.getStringArray(RESULTS));
+            mVisuals = tempVisuals;
+            mTotalResistances = tempResistances;
+            mRanks = tempRanks;
+            mSizes = tempSizes;
             setPagerWithResults();
         } else if (mModel.getSize() == 0) {
             // Data needs to be filled in.
@@ -91,11 +117,11 @@ public class MainActivity extends AppCompatActivity {
                     compactPriority = 99;
                 String search = mSearchEditText.getText().toString();
                 try {
-                    double searchDouble = Double.parseDouble(search);
-                    // Possible to have zero priority for size (focus on accuracy).
+                    mGoalResistance = EditSetActivity.getPositiveDouble(search);
                     setPagerWithMessage(getResources().getString(R.string.wait));
                     mSearchButton.setEnabled(false);
-                    optimizer.execute(searchDouble, (double)compactPriority);
+                    optimizer = new RunOptimizer();
+                    optimizer.execute(mGoalResistance, (double)compactPriority);
                 } catch (NumberFormatException e) {
                     mSearchEditText.setTextColor(Color.RED);
                 }
@@ -123,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.editMenuItem:
@@ -218,21 +245,19 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
-            public Fragment getItem(int position) {
-                String RPNMessage = mResults.get(position);
-                return ResistorFragment.getFragment(RPNMessage, position+1);
+            public Fragment getItem(int i) {
+                String visual = mVisuals[i];
+                double totalResistance = mTotalResistances[i];
+                int rank = mRanks[i];
+                int size = mSizes[i];
+                return ResistorFragment.getFragment(visual, mGoalResistance,totalResistance, rank, size);
             }
 
             @Override
             public int getCount() {
-                return mResults.size();
+                return mVisuals.length;
             }
         });
-        optimizerFinished();
-    }
-
-    private void optimizerFinished() {
-        optimizer = new RunOptimizer();
         mSearchButton.setEnabled(true);
     }
 
@@ -252,44 +277,94 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private class RunOptimizer extends AsyncTask<Double,Void,List<String>> {
+    public void setResultsPagerToFront() {
+        mViewPager.setCurrentItem(0);
+    }
+
+    private class RunOptimizer extends AsyncTask<Double,Void,ResultsWrapper> {
         // Code to run in the background.
         // Void… params means to put the remaining arguments into an array of type Void named params.
         // Works only as the last argument.
         @Override
-        protected List<String> doInBackground(Double... params) {
+        protected ResultsWrapper doInBackground(Double... params) {
             double searchDouble = params[0];
             double compactPriority = params[1];
             Log.d(TAG, "Desired resistance: " + searchDouble);
             Log.d(TAG, "Size priority: " + compactPriority);
+
             double[] resistances = mModel.getResistancesArr();
-            List<String> outputs = MainOptimizer.run(resistances, searchDouble, (int)compactPriority, 3000, 3, 50, -1);
-            int numOutputs = outputs.size();
             int TOP = 10;
-            int keepNum = numOutputs < TOP ? numOutputs : TOP;
-            return outputs.subList(0, keepNum);
+            List<Queue<DNADecipherUnit>> queues = MainOptimizer.runAndGetQueues(resistances, searchDouble, (int)compactPriority, 3000, 3, 50, TOP);
+
+            int size = queues.size();
+            String[] visuals = new String[size];
+            double[] totalResistances = new double[size];
+            int[] ranks = new int[size];
+            int[] sizes = new int[size];
+
+            for(int i = 0; i < size; i ++) {
+                Queue<DNADecipherUnit> queue = queues.get(i);
+                DNADecipherUnit first = queue.peek();
+                DNA instructions = first.getDNA();
+
+                String visual = EvolveOptimalResistors.visualizeDNA(queue, false);
+                double totalResistance = instructions.getTotalResistance();
+                int rank = instructions.getRank();
+                int resistorSize = instructions.getSize();
+
+                visuals[i] = visual;
+                totalResistances[i] = totalResistance;
+                ranks[i] = rank;
+                sizes[i] = resistorSize;
+            }
+            return new ResultsWrapper(visuals, totalResistances, ranks, sizes);
         }
 
 
         @Override
-        protected void onPostExecute(List<String> strings) {
-            mResults = strings;
+        protected void onPostExecute(ResultsWrapper results) {
+            // Best practice to change UI components in main thread.
+            mVisuals = results.mVisuals;
+            mTotalResistances = results.mTotalResistances;
+            mRanks = results.mRanks;
+            mSizes = results.mSizes;
             setPagerWithResults();
         }
+    }
+
+    static class ResultsWrapper {
+        String[] mVisuals;
+        double[] mTotalResistances;
+        int[] mRanks;
+        int[] mSizes;
+
+        public ResultsWrapper(String[] visuals, double[] totalResistances, int[] ranks, int[] sizes) {
+            mVisuals = visuals;
+            mTotalResistances = totalResistances;
+            mRanks = ranks;
+            mSizes = sizes;
+        }
+
     }
 
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        if(mResults.size() != 0) {
-            String[] arr = mResults.toArray(new String[0]);
-            bundle.putStringArray(RESULTS, arr);
+        if(mVisuals.length != 0) {
+            bundle.putStringArray(VISUALS, mVisuals);
+            bundle.putDoubleArray(TOTAL_RESISTANCES, mTotalResistances);
+            bundle.putIntArray(RANKS, mRanks);
+            bundle.putIntArray(SIZES, mSizes);
+            bundle.putDouble(GOAL, mGoalResistance);
         }
+        String search = mSearchEditText.getText().toString();
+        bundle.putString(SEARCH, search);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        optimizer.cancel(false);
+        if(optimizer != null)
+            optimizer.cancel(false);
     }
 }

@@ -140,7 +140,7 @@ public class EvolveOptimalResistors {
      */
     private double inverseWeightedSum(Resistor r) {
         double diff = Math.abs(mDesiredResistance - r.getTempTotalResistance());
-        double squareSizePenalty = Math.pow(r.getTempSize(), 1.1);
+        double squareSizePenalty = Math.pow(r.getTempSize(), 1.5);
         double result =  1 / (diff * mAccuracyPriority + squareSizePenalty * mSizePriority);
         return result;
     }
@@ -345,22 +345,38 @@ public class EvolveOptimalResistors {
     }
 
     public List<String> uniqueMostFitStr(int num) {
-        DNA[] topResults = mostFitDNA(num);
-        List<String> visuals = new ArrayList<>();;
+        DNA[] topResults = mostFitDNA(-1);
+        List<String> visuals = new ArrayList<>();
         Set<String> used = new HashSet<>();
-        for(int i = 0; i < topResults.length; i ++) {
+        for(int i = 0; i < topResults.length && visuals.size() < num; i ++) {
             DNA one = topResults[i];
             String code = one.getTotalResistance() + " " + one.getSize();
             if (!used.contains(code)) {
                 used.add(code);
                 Queue<DNADecipherUnit> queue = RPNQueue(one);
-                visuals.add(visualizeDNA(queue));
+                visuals.add(visualizeDNA(queue, true));
             }
         }
         return visuals;
     }
 
-    private String visualizeDNA(Queue<DNADecipherUnit> RPNQueue) {
+    public List<Queue<DNADecipherUnit>> uniqueMostFitQueues(int numTop) {
+        DNA[] dna = mostFitDNA(-1);
+        List<Queue<DNADecipherUnit>> queues = new ArrayList<>();
+        Set<String> used = new HashSet<>();
+        for(int i = 0; i < dna.length && queues.size() < numTop; i++) {
+            DNA one = dna[i];
+            String code = one.getTotalResistance() + " " + one.getSize();
+            if (!used.contains(code)) {
+                used.add(code);
+                Queue<DNADecipherUnit> queue = RPNQueue(one);
+                queues.add(queue);
+            }
+        }
+        return queues;
+    }
+
+    public static String visualizeDNA(Queue<DNADecipherUnit> RPNQueue, boolean appendExtras) {
         DNADecipherUnit first = RPNQueue.poll();
         if(first.type() != DNADecipherUnit.DNA)
             throw new ArithmeticException("First element in RPN must be DNA that created this RPN.");
@@ -379,8 +395,12 @@ public class EvolveOptimalResistors {
             }
         }
         DNADecipherUnit result = stack.pop();
-        String visual = String.format("%s, TOTAL RESISTANCE: %.3f ohms, TOTAL SIZE: %d, RANK: %d",
-                result.getVisual(), instructions.getTotalResistance(), instructions.getSize(), instructions.getRank());
-        return visual;
+        if(appendExtras) {
+            String visual = String.format("%s, TOTAL RESISTANCE: %.3f ohms, TOTAL SIZE: %d, RANK: %d",
+                    result.getVisual(), instructions.getTotalResistance(), instructions.getSize(), instructions.getRank());
+            return visual;
+        } else {
+            return result.getVisual();
+        }
     }
 }

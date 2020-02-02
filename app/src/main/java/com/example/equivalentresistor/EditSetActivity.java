@@ -119,6 +119,20 @@ public class EditSetActivity extends AppCompatActivity {
             holder.itemView.clearFocus();
     }
 
+    public static double getPositiveDouble(String num) throws NumberFormatException {
+        double result = Double.parseDouble(num);
+        if(result <= 0)
+            throw new NumberFormatException();
+        return result;
+    }
+
+    public static int getPositiveInt(String num) throws NumberFormatException {
+        int result = Integer.parseInt(num);
+        if(result <= 0)
+            throw new NumberFormatException();
+        return result;
+    }
+
     private List<Double> allDataLegal() {
         boolean returnNull = false;
         int size = mResistorEntries.size();
@@ -128,18 +142,14 @@ public class EditSetActivity extends AppCompatActivity {
             Boolean[] legals = mLegalValues.get(i);
             double resistance = 0;
             try {
-                resistance = Double.parseDouble(entry[0]);
-                if(resistance <= 0)
-                    throw new NumberFormatException();
+                resistance = getPositiveDouble(entry[0]);
                 legals[0] = true;
             } catch(NumberFormatException e) {
                 legals[0] = false;
                 returnNull = true;
             }
             try {
-                int qty = Integer.parseInt(entry[1]);
-                if(qty <= 0)
-                    throw new NumberFormatException();
+                int qty = getPositiveInt(entry[1]);
                 legals[1] = true;
                 for(int qty_i = 0;legals[0] &&  qty_i  <qty; qty_i++)
                     resistances.add(resistance);
@@ -276,6 +286,8 @@ public class EditSetActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
+        // To save information that is currently being updated during rotation.
+        clearHoldersFocus();
         int size = mResistorEntries.size();
         if(size != 0) {
             String[][] entryArrs = getEntryArrays();
