@@ -183,45 +183,42 @@ public class EditSetActivity extends AppCompatActivity {
         }
     }
 
-    private static String processFileNames(Context context, File[] existingFiles, String fileName) throws IllegalArgumentException {
-        if(fileName.charAt(0) == '~') {
-            // No need to unmark an existing file or mark a new file.
-            return fileName;
-        }
-
-        File marked = null;
-        String markedNameNoMark = "";
+    public static void unMarkFile(Context context, File[] existingFiles, String fileName) throws IllegalArgumentException {
         for(File existingFile : existingFiles) {
             String existingFileName = existingFile.getName();
             // Keeping track of previous marked file.
             if (existingFileName.charAt(0) == '~') {
-                existingFileName = existingFileName.substring(1);
-                marked = existingFile;
-                markedNameNoMark = existingFileName;
+                String markedNameNoMark = existingFileName.substring(1);
+
+                // Now unmarking
+                File newFile = new File(context.getFilesDir(), MainActivity.mDataDirName + "/" + markedNameNoMark);
+                boolean result = existingFile.renameTo(newFile);
             }
         }
+    }
 
-        // Unmark previous marked file.
-        if(marked != null) {
-            File newFile = new File(context.getFilesDir(), MainActivity.mDataDirName + "/" + markedNameNoMark);
-            boolean result = marked.renameTo(newFile);
-        }
-
-        return "~" + fileName;
+    public static void deletePotentialDuplicates(Context context, String unMarkFileName) {
+        File dir = new File(context.getFilesDir(), MainActivity.mDataDirName);
+        File unMarked = new File(dir, unMarkFileName);
+        File marked = new File(dir, "~" + unMarkFileName);
+        if(unMarked.exists())
+            unMarked.delete();
+        if(marked.exists())
+            marked.delete();
     }
 
     /*
     Automatically marks newly added file and unmarks old file. User must handle exceptions.
      */
-    private static void writeFileOnInternalStorage(Context context, String fileName, String body) throws IOException {
+    public static void writeFileOnInternalStorage(Context context, String fileName, String body) throws IOException {
         File dir = new File(context.getFilesDir(), MainActivity.mDataDirName);
         if(!dir.exists())
             dir.mkdir();
 
         if(fileName.charAt(0) != '~') {
-            boolean result = new File(dir, fileName).delete();
-            File[] existingFiles = dir.listFiles();
-            fileName = processFileNames(context, existingFiles, fileName);
+            deletePotentialDuplicates(context, fileName);
+            unMarkFile(context, dir.listFiles(), fileName);
+            fileName = "~" + fileName;
         }
         File dataFile = new File(dir, fileName);
         FileWriter writer = new FileWriter(dataFile);

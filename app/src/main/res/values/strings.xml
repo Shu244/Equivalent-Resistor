@@ -5,7 +5,7 @@
     <string name="go">GO</string>
     <string name="search_hint">Desired Resistance</string>
     <string name="no_resistors_message">Please Edit The Available Resistances.</string>
-    <string name="wait">Please wait…</string>
+    <string name="wait">Please wait</string>
     <string name="ready">Ready to optimize.</string>
 
 
@@ -24,6 +24,13 @@
     <!-- Adding new resistor set dialog Strings. -->
     <string name="name">Set Name</string>
     <string name="add_resistor_set_dialog_title">Please name the new set</string>
+    <string name="download_resistor_set_dialog_title">Please enter the URL</string>
+    <string name="download_failed">Download Failed</string>
+    <string name="url">URL</string>
+    <string name="set_url_dialog_title">Please provide a URL</string>
+    <string name="downloading">Downloading…</string>
+    <string name="example_url">https://raw.githubusercontent.com/Shu244/Resistor-Sets/master/JHU%20Mastering%20Electronics%20Set</string>
+    <string name="cant_download">Cannot download set</string>
 
     <!-- Adding new resistor to set Strings. -->
     <string name="ohms">Ohms:</string>

@@ -18,7 +18,6 @@ public class ResistorsAdapter extends RecyclerView.Adapter<ResistorsAdapter.Resi
 
     private List<String[]> mResistorEntries;
     private List<Boolean[]> mLegalValues;
-
     private List<ResistorsViewHolder> mHolders;
 
     public ResistorsAdapter(List<String[]> resistorEntries, List<Boolean[]> legalValues) {
