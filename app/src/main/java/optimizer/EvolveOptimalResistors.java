@@ -388,7 +388,7 @@ public class EvolveOptimalResistors {
             if(unit.type() == DNADecipherUnit.OPERATOR) {
                 DNADecipherUnit giver = stack.pop();
                 DNADecipherUnit receiver = stack.pop();
-                receiver.combine(giver, unit.getOperator());
+                receiver.combine(giver, unit.getOperator(), !stack.isEmpty());
                 stack.add(receiver);
             } else {
                 stack.add(unit);
