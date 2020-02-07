@@ -1,6 +1,5 @@
 package com.example.equivalentresistor;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
@@ -20,7 +19,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -219,8 +217,8 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onStop() {
-            super.onStop();
+        public void onDestroy() {
+            super.onDestroy();
             if(mBackground != null)
                 mBackground.cancel(false);
         }
@@ -229,7 +227,9 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             if(savedInstanceState != null)
                 mUrl = savedInstanceState.getString(URL);
-            View v = LayoutInflater.from(getActivity()).inflate(R.layout.downloading_dialog, null);
+            View v = LayoutInflater.from(getActivity()).inflate(R.layout.single_message_dialog, null);
+            TextView message = v.findViewById(R.id.singleMessageTextView);
+            message.setText(getResources().getString(R.string.downloading));
             // Creating custom centered title
             final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
@@ -325,9 +325,26 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
     private void downloadFail() {
         if(mDownloadSetDialog != null) {
             mDownloadSetDialog.dismiss();
+            new FailedDialog().show(getSupportFragmentManager(), "");
         }
-        Toast.makeText(this, getResources().getText(R.string.cant_download), Toast.LENGTH_LONG).show();
+    }
 
+    public static class FailedDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            View v = LayoutInflater.from(getActivity()).inflate(R.layout.single_message_dialog, null);
+            TextView message = v.findViewById(R.id.singleMessageTextView);
+            message.setText(getResources().getString(R.string.download_failed));
+            // Creating custom centered title
+            final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
+                    .setView(v) // Set date selector view between title and button(s)
+                    .setTitle(R.string.error)
+                    // null can be DialogInterface.OnClickListener
+                    .setNegativeButton(android.R.string.cancel, null) // Will close automatically when clicked.
+                    .create();
+            return dialog;
+        }
     }
 
     private void downloadSuccessful(String fileName) {

@@ -43,23 +43,24 @@ public class MainActivity extends AppCompatActivity {
     public static final String SEARCH = "com.example.equivalentresistor.searchs";
 
 
-    private ResistorModel mModel;
-
     private ViewPager mViewPager;
     private SeekBar mSizePrioritySeekBar;
     private TextView mSearchEditText;
     private Button mSearchButton;
 
+    private ResistorModel mModel;
     private String[] mVisuals = new String[0];
     private double[] mTotalResistances = new double[0];
     private int[] mRanks = new int[0];
     private int[] mSizes = new int[0];
     private double mGoalResistance;
-    private RunOptimizer optimizer;
+    private RunOptimizer mOptimizer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "MainActivity onCreate() called.");
         setContentView(R.layout.activity_main);
 
         mViewPager = findViewById(R.id.viewPager);
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         int[] tempRanks = null;
         int[] tempSizes = null;
         if(savedInstanceState != null) {
+            // savedInstanceState is not null but desired items might not be saved.
             tempVisuals = savedInstanceState.getStringArray(VISUALS);
             tempResistances = savedInstanceState.getDoubleArray(TOTAL_RESISTANCES);
             tempRanks = savedInstanceState.getIntArray(RANKS);
@@ -120,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
                     mGoalResistance = EditSetActivity.getPositiveDouble(search);
                     setPagerWithMessage(getResources().getString(R.string.wait));
                     mSearchButton.setEnabled(false);
-                    optimizer = new RunOptimizer();
-                    optimizer.execute(mGoalResistance, (double)compactPriority);
+                    mOptimizer = new RunOptimizer();
+                    mOptimizer.execute(mGoalResistance, (double)compactPriority);
                 } catch (NumberFormatException e) {
                     mSearchEditText.setTextColor(Color.RED);
                 }
@@ -137,6 +139,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "MainActivity onStart() called.");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "MainActivity onResume() called.");
     }
 
     @Override
@@ -350,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
+        Log.d(TAG, "MainActivity onSaveInstanceState() called.");
         if(mVisuals.length != 0) {
             bundle.putStringArray(VISUALS, mVisuals);
             bundle.putDoubleArray(TOTAL_RESISTANCES, mTotalResistances);
@@ -362,9 +377,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "MainActivity onPause() called.");
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
-        if(optimizer != null)
-            optimizer.cancel(false);
+        Log.d(TAG, "MainActivity onStop() called.");
     }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "MainActivity onDestroy() called.");
+        if(mOptimizer != null)
+            mOptimizer.cancel(false);
+    }
+
 }

@@ -60,6 +60,7 @@ public class EditSetActivity extends AppCompatActivity {
         mResistorEntries = new ArrayList<>();
 
         if(savedInstanceState != null) {
+            // Keys could return null?
             String[] ohmEntries = savedInstanceState.getStringArray(OHM_ENTRIES);
             String[] qtyEntries = savedInstanceState.getStringArray(QTY_ENTRIES);
             boolean[] ohmErrors = savedInstanceState.getBooleanArray(OHM_ERRORS);
