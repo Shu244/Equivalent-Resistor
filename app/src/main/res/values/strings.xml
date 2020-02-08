@@ -26,7 +26,7 @@
     <string name="name">Set Name</string>
     <string name="add_resistor_set_dialog_title">Please name the new set</string>
     <string name="download_failed">Download Failed</string>
-    <string name="download_instructions"> Please provide the URL for the data. \n URL must follow the format of the example</string>
+    <string name="download_instructions"> Please provide the URL for the data. \n URL must follow the format of the example.</string>
     <string name="url">URL</string>
     <string name="downloading">Downloading…</string>
     <string name="example_url">https://raw.githubusercontent.com/Shu244/Resistor-Sets/master/JHU%20Mastering%20Electronics%20Set</string>
