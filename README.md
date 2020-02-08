@@ -75,4 +75,4 @@ SetName
 
 ## Exporting
 
-> The genetic algorithm is independent and entirely contained in the *optimizer* package. The package can return a queue that holds information about the an equivalent resistor (like size and total resistance) as well as instructions on how to build the equivalent resistor. The instructions are represented in [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation ).
+> The genetic algorithm is independent and entirely contained in the *optimizer* package. The package can return a queue that holds information about the an equivalent resistor (like size and total resistance) as well as instructions on how to build the equivalent resistor. The instructions are represented in [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation ). Please refer to the source code for more information.
