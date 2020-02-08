@@ -22,12 +22,12 @@
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
         android:clickable="false"
-        app:backgroundTint="#00BCD4"
+        app:backgroundTint="@color/download_background"
         app:fabSize="mini"
         app:layout_constraintBottom_toTopOf="@+id/addFAB"
         app:layout_constraintEnd_toEndOf="parent"
         app:maxImageSize="30dp"
-        app:srcCompat="@drawable/ic_download_foreground" />
+        app:srcCompat="@drawable/ic_download" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addFAB"
@@ -36,9 +36,9 @@
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
         android:clickable="true"
-        app:backgroundTint="#8BC34A"
+        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="70dp"
-        app:srcCompat="@drawable/ic_add_foreground" />
+        app:maxImageSize="40dp"
+        app:srcCompat="@drawable/ic_add" />
 </androidx.constraintlayout.widget.ConstraintLayout>

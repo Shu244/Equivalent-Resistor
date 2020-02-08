@@ -26,11 +26,11 @@
         android:layout_marginBottom="40dp"
         android:clickable="true"
         android:focusable="true"
-        app:backgroundTint="#8BC34A"
+        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="70dp"
-        app:srcCompat="@drawable/ic_add_foreground" />
+        app:maxImageSize="40dp"
+        app:srcCompat="@drawable/ic_add" />
 
     <Button
         android:id="@+id/submitSetButton"

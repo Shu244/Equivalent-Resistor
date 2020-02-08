@@ -25,11 +25,9 @@
     <!-- Adding new resistor set dialog Strings. -->
     <string name="name">Set Name</string>
     <string name="add_resistor_set_dialog_title">Please name the new set</string>
-    <string name="download_resistor_set_dialog_title">Please enter the URL</string>
     <string name="download_failed">Download Failed</string>
-    <string name="download_instructions">Provide URL for data \n Follow format of example URL (raw file from GitHub)</string>
+    <string name="download_instructions"> Please provide the URL for the data. \n URL must follow the format of the example URL</string>
     <string name="url">URL</string>
-    <string name="set_url_dialog_title">Please provide a URL</string>
     <string name="downloading">Downloading…</string>
     <string name="example_url">https://raw.githubusercontent.com/Shu244/Resistor-Sets/master/JHU%20Mastering%20Electronics%20Set</string>
     <string name="cant_download">Cannot download set</string>

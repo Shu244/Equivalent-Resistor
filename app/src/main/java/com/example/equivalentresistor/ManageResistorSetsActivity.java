@@ -154,6 +154,14 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         return true;
     }
 
+    private DownloadData getDownloadDataInstance() {
+        return new DownloadData();
+    }
+
+    private void setDownloadSetDialog(DownloadSetDialog dialog) {
+        mDownloadSetDialog = dialog;
+    }
+
     public static class GetURLDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -162,7 +170,6 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
             // Creating custom centered title
             final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
                     .setView(v) // Set date selector view between title and button(s)
-                    .setTitle(R.string.set_url_dialog_title)
                     // null can be DialogInterface.OnClickListener
                     .setNegativeButton(android.R.string.cancel, null) // Will close automatically when clicked.
                     .setPositiveButton(android.R.string.ok, null) // Overriding next.
@@ -187,14 +194,6 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
             });
             return dialog;
         }
-    }
-
-    private DownloadData getDownloadDataInstance() {
-        return new DownloadData();
-    }
-
-    private void setDownloadSetDialog(DownloadSetDialog dialog) {
-        mDownloadSetDialog = dialog;
     }
 
     public static class DownloadSetDialog extends DialogFragment {
@@ -263,6 +262,24 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         }
     }
 
+    public static class FailedDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            View v = LayoutInflater.from(getActivity()).inflate(R.layout.single_message_dialog, null);
+            TextView message = v.findViewById(R.id.singleMessageTextView);
+            message.setText(getResources().getString(R.string.download_failed));
+            // Creating custom centered title
+            final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
+                    .setView(v) // Set date selector view between title and button(s)
+                    .setTitle(R.string.error)
+                    // null can be DialogInterface.OnClickListener
+                    .setNegativeButton(android.R.string.cancel, null) // Will close automatically when clicked.
+                    .create();
+            return dialog;
+        }
+    }
+
     private class DownloadData extends AsyncTask<String,Void,String[]> {
         @Override
         protected String[] doInBackground(String... params) {
@@ -326,24 +343,6 @@ public class ManageResistorSetsActivity extends AppCompatActivity {
         if(mDownloadSetDialog != null) {
             mDownloadSetDialog.dismiss();
             new FailedDialog().show(getSupportFragmentManager(), "");
-        }
-    }
-
-    public static class FailedDialog extends DialogFragment {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            View v = LayoutInflater.from(getActivity()).inflate(R.layout.single_message_dialog, null);
-            TextView message = v.findViewById(R.id.singleMessageTextView);
-            message.setText(getResources().getString(R.string.download_failed));
-            // Creating custom centered title
-            final AlertDialog dialog =  new AlertDialog.Builder(getActivity())
-                    .setView(v) // Set date selector view between title and button(s)
-                    .setTitle(R.string.error)
-                    // null can be DialogInterface.OnClickListener
-                    .setNegativeButton(android.R.string.cancel, null) // Will close automatically when clicked.
-                    .create();
-            return dialog;
         }
     }
 

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/editMenuItem"
-        android:icon="@drawable/ic_edit_resistances_foreground"
+        android:icon="@drawable/ic_edit_resistances"
         android:title="@string/edit"
         app:showAsAction="ifRoom|withText"/>
 </menu>

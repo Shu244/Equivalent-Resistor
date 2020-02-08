@@ -15,8 +15,8 @@
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="70dp"
-        app:srcCompat="@drawable/ic_information_foreground" />
+        app:maxImageSize="30dp"
+        app:srcCompat="@drawable/ic_info" />
 
     <TextView
         android:id="@+id/rankerTextView"
@@ -39,11 +39,10 @@
         android:layout_marginLeft="20dp"
         android:layout_marginBottom="20dp"
         android:clickable="true"
-        android:scaleX="-1"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        app:srcCompat="@drawable/ic_left_arrow" />
 
     <ScrollView
         android:layout_width="match_parent"
