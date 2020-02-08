@@ -23,10 +23,10 @@ SetName
 
 # Previews
 
-| <img src=".\images\app\1.jpg" style="zoom:30%;" /> | <img src=".\images\app\2.jpg" style="zoom:30%;" /> | <img src=".\images\app\3.jpg" style="zoom:30%;" /> |
+| <img src=".\images\App\1.jpg" style="zoom:30%;" /> | <img src=".\images\App\2.jpg" style="zoom:30%;" /> | <img src=".\images\App\3.jpg" style="zoom:30%;" /> |
 | :------------------------------------------------: | :------------------------------------------------: | :------------------------------------------------: |
 |                       **1**                        |                       **2**                        |                       **3**                        |
-| <img src=".\images\app\4.jpg" style="zoom:30%;" /> | <img src=".\images\app\5.jpg" style="zoom:30%;" /> | <img src=".\images\app\6.jpg" style="zoom:30%;" /> |
+| <img src=".\images\App\4.jpg" style="zoom:30%;" /> | <img src=".\images\App\5.jpg" style="zoom:30%;" /> | <img src=".\images\App\6.jpg" style="zoom:30%;" /> |
 |                       **4**                        |                       **5**                        |                       **6**                        |
 
 
@@ -41,11 +41,11 @@ SetName
 
 > If the current equivalent resistance is smaller than the desired resistance, an optimal resistor will be added in **series**. The optimal resistor is calculated as follows:
 
-<img src=".\images\equations\series_equation.PNG" align="center"/>
+<img src=".\images\Equations\series_equation.PNG" align="center"/>
 
 > If the current equivalent resistance is larger than the desired resistance, an optimal resistor will be added in **parallel**. The optimal resistor is calculated as follows:
 
-<img src=".\images\equations\parallel_equation.PNG" align="center"/>
+<img src=".\images\Equations\parallel_equation.PNG" align="center"/>
 
 > Since the optimal resistors may not be in the set of available resistors, the closest match will be used instead (but only if the new resistance is closer to the desired resistance).
 
