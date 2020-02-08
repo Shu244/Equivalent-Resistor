@@ -41,11 +41,11 @@ SetName
 
 > If the current equivalent resistance is smaller than the desired resistance, an optimal resistor will be added in **series**. The optimal resistor is calculated as follows:
 
-<img src=".\images\Equations\series_equation.PNG" align="center"/>
+<p align="center"><img src=".\images\Equations\series_equation.PNG" /></p>
 
 > If the current equivalent resistance is larger than the desired resistance, an optimal resistor will be added in **parallel**. The optimal resistor is calculated as follows:
 
-<img src=".\images\Equations\parallel_equation.PNG" align="center"/>
+<p align="center"><img src=".\images\Equations\parallel_equation.PNG" /></p>
 
 > Since the optimal resistors may not be in the set of available resistors, the closest match will be used instead (but only if the new resistance is closer to the desired resistance).
 
