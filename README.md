@@ -44,9 +44,11 @@ SetName
 > If the current equivalent resistance is smaller than the desired resistance, an optimal resistor will be added in **series**. The optimal resistor is calculated as follows:
 
 <p align="center"><img src=".\images\Equations\series_equation.PNG" /></p>
+
 > If the current equivalent resistance is larger than the desired resistance, an optimal resistor will be added in **parallel**. The optimal resistor is calculated as follows:
 
 <p align="center"><img src=".\images\Equations\parallel_equation.PNG" /></p>
+
 > Since the optimal resistors may not be in the set of available resistors, the closest match will be used instead (but only if the new resistance is closer to the desired resistance).
 
 > Once a predefined number of greedy circuits have been built, they are converted to a DNA object and used to fill some of the initial population for the genetic algorithm.
